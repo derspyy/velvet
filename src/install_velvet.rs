@@ -1,8 +1,7 @@
 use crate::get_minecraft_dir;
 use crate::write_json;
 use std::{fs, io};
-use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 #[allow(unused_must_use)]
 pub fn run(version: String) {
     let mut mc_path = PathBuf::from(&get_minecraft_dir::dir());
@@ -41,17 +40,27 @@ pub fn run(version: String) {
     path_version.push("versions");
     path_version.push(&version_folder_name);
     fs::create_dir_all(&path_version);
+    println!("{:?}", &path_version);
     // The above creates it's folder version.
 
     path_version.push(&version_folder_name);
-    path_version.set_extension("jar");
-    fs::File::create(&path_version);
+    let mut jar_file = add_ext(path_version);
+    jar_file.set_extension("jar");
+    fs::File::create(&jar_file);
+    println!("{:?}", &jar_file);
     // The above creates it's dummy jar.
 
-    path_version.set_extension("json");
-    fs::File::create(&path_version);
+    jar_file.set_extension("json");
+    fs::File::create(&jar_file);
     write_json::version_json(&version);
+    println!("{:?}", &jar_file);
     // The above creates it's json.
 
     println!("Directories created successfully.")
+}
+
+fn add_ext(x: PathBuf) -> PathBuf {
+    let y = String::from(x.into_os_string().into_string().unwrap() + ".jar");
+    println!("{}", &y);
+    PathBuf::from(&y)
 }
