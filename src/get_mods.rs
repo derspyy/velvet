@@ -1,4 +1,4 @@
-use std::{path::PathBuf, io::copy, fs::{File, self}};
+use std::{path::PathBuf, io::{copy, Write}, fs::{File, self}};
 
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
@@ -27,10 +27,10 @@ pub async fn run(mc_version: &String, mut path: PathBuf) {
                     .unwrap()
                     .to_string();
             file_name = percent_decode_str(&file_name).decode_utf8().unwrap().into_owned();
-            let download = reqwest::get(url).await.unwrap().text().await.unwrap();
+            let download = reqwest::get(url).await.unwrap().bytes().await.unwrap();
             path.push(file_name);
             let mut mod_file = File::create(&path).unwrap();
-            copy(&mut download.as_bytes(), &mut mod_file).unwrap();
+            mod_file.write_all(&download).unwrap();
             path.pop();
         } else {
             return
