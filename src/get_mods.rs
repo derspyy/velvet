@@ -1,4 +1,4 @@
-use std::{path::PathBuf, io::{copy, Write}, fs::{File, self}};
+use std::{path::PathBuf, io::Write, fs::File};
 
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
