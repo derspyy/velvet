@@ -4,12 +4,12 @@ use std::path::PathBuf;
 use std::{fs, io};
 
 #[allow(unused_must_use)]
-pub fn run(mc_version: &String, velvet_version: &String) {
+pub fn run(mc_version: &String, velvet_version: &String) -> PathBuf {
     let mut mc_path = PathBuf::from(&get_minecraft_dir::dir());
     println!("Testing expected directory...");
 
     while mc_path.is_dir() == false {
-        println!("Your Minecraft directory was not found, could you enter it's path?");
+        println!("Minecraft directory was not found. Enter it's path:");
         let mut temp_path = String::new();
         io::stdin()
             .read_line(&mut temp_path)
@@ -29,7 +29,8 @@ pub fn run(mc_version: &String, velvet_version: &String) {
 
     let mut path_mods = PathBuf::from(&velvet_path);
     path_mods.push("mods");
-    fs::create_dir(&path_mods);
+    path_mods.push(&mc_version);
+    fs::create_dir_all(&path_mods);
 
     let mut path_loader = PathBuf::from(&velvet_path);
     path_loader.push("loader");
@@ -68,6 +69,8 @@ pub fn run(mc_version: &String, velvet_version: &String) {
         .expect("Couldn't add the Velvet profile. Is your minecraft directory protected?");
 
     write_json::write_profile(&mc_version, &velvet_version, &profile);
+
+    path_mods
 }
 
 fn add_extension(x: PathBuf) -> PathBuf {

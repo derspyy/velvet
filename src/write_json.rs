@@ -34,6 +34,6 @@ pub fn write_profile (mc: &String, velvet: &String, mut z: &File) {
         "type": "custom"
     });
     z.rewind().unwrap();
-    z.flush().unwrap();
     serde_json::to_writer_pretty(z, &json).unwrap();
+    z.flush().unwrap();
 }

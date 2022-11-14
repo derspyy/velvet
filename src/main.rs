@@ -22,10 +22,12 @@ fn main() {
         .expect("Couldn't read.");
     mc_version = rm_newline(mc_version);
     println!("Selected version: {}", &mc_version);
-    install_velvet::run(&mc_version, &velvet_version);
+    let path_mods = install_velvet::run(&mc_version, &velvet_version);
+
+    get_mods::run(&mc_version, path_mods);
 }
 
-fn rm_newline(mut x: String) -> String {
+pub fn rm_newline(mut x: String) -> String {
     if x.ends_with('\n') {
         x.pop();
         if x.ends_with('\r') {
