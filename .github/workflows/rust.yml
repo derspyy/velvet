@@ -25,4 +25,4 @@ jobs:
       uses: actions/upload-artifact@v3.1.1
       with:
         name: velvet-${{ matrix.os }}
-        path: ${{ '/target/release/velvet-minecraft' || '/target/release/velvet-minecraft.exe'  }}
+        path: ${{ '**/velvet-minecraft' || '**/velvet-minecraft.exe'  }}
