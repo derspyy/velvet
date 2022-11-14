@@ -30,6 +30,7 @@ pub fn run(mc_version: &String, velvet_version: &String) -> PathBuf {
     let mut path_mods = PathBuf::from(&velvet_path);
     path_mods.push("mods");
     path_mods.push(&mc_version);
+    fs::remove_dir_all(&path_mods);
     fs::create_dir_all(&path_mods);
 
     let mut path_loader = PathBuf::from(&velvet_path);

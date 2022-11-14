@@ -1,4 +1,4 @@
-use std::{path::PathBuf, io::copy, fs::File};
+use std::{path::PathBuf, io::copy, fs::{File, self}};
 
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
@@ -17,7 +17,7 @@ pub async fn run(mc_version: &String, mut path: PathBuf) {
         ];
     for x in mods {
         println!("Downloading: {}", modrinth.get_project(&x).await.unwrap().title);
-        let versions = modrinth.list_versions_filtered(&x, None,  Some(&[&mc_version.as_str()]), None).await.unwrap();
+        let versions = modrinth.list_versions_filtered(&x, Some(&["quilt", "fabric"]),  Some(&[&mc_version.as_str()]), None).await.unwrap();
         if versions.len() != 0 {
             let url = versions[0].files[0].url.to_owned();
             let mut file_name = url
