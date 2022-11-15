@@ -1,10 +1,12 @@
+use colored::Colorize;
+
 use crate::{get_minecraft_dir, write_json};
 use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
 use std::{fs, io};
 
 #[allow(unused_must_use)]
-pub fn run(mc_version: &String, velvet_version: &String) -> PathBuf {
+pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
     let mut mc_path = PathBuf::from(&get_minecraft_dir::dir());
     println!("Testing expected directory...");
 
@@ -37,9 +39,9 @@ pub fn run(mc_version: &String, velvet_version: &String) -> PathBuf {
     path_loader.push("loader");
     fs::create_dir(&path_loader);
 
-    println!("Installing Velvet Loader for version: {:?}", &mc_version);
+    println!("Installing Quilt Loader for version: {}", &mc_version.purple().italic());
 
-    let version_folder_name = format!("velvet-quilt-loader-{}-{}", &velvet_version, &mc_version);
+    let version_folder_name = format!("quilt-loader-{}-{}", &quilt_version, &mc_version);
     let mut path_version = PathBuf::from(&mc_path);
     path_version.push("versions");
     path_version.push(&version_folder_name);
@@ -54,7 +56,7 @@ pub fn run(mc_version: &String, velvet_version: &String) -> PathBuf {
 
     jar_file.set_extension("json");
     let json_file = File::create(&jar_file).unwrap();
-    write_json::write_version(&mc_version, &velvet_version, &json_file);
+    write_json::write_version(&mc_version, &quilt_version, &json_file);
     // The above creates it's json.
 
     println!("Directories created successfully.");
@@ -69,7 +71,7 @@ pub fn run(mc_version: &String, velvet_version: &String) -> PathBuf {
         .open(&mc_path)
         .expect("Couldn't add the Velvet profile. Is your minecraft directory protected?");
 
-    write_json::write_profile(&mc_version, &velvet_version, &profile);
+    write_json::write_profile(&mc_version, &quilt_version, &profile);
 
     path_mods
 }

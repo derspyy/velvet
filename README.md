@@ -12,7 +12,7 @@ I made it because I know people that dislike manually installing Quilt and downl
 
 It's also a hobby project, since I wanted to dip my toes into Rust.
 
-It installs a [quilt fork](https://github.com/derspyy/velvet-quilt-loader), and downloads the following mods (for any version):
+It installs a quilt, and downloads the following mods (for any version):
 
 - Sodium
 - Lithium

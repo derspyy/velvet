@@ -1,3 +1,4 @@
+use colored::Colorize;
 use dirs;
 use std::env;
 use std::io;
@@ -31,7 +32,7 @@ pub fn dir() -> String {
     if os() != "unknown" {
         mc_dir.push_str(&*&home());
         mc_dir.push_str(&os());
-        println!("Expected Minecraft directory: {}", mc_dir);
+        println!("Expected Minecraft directory: {}", &mc_dir.purple().italic());
     } else {
         println!("Couldn't predict your directory! Enter your minecraft directory:");
         io::stdin()
