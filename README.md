@@ -15,6 +15,7 @@ It's also a hobby project, since I wanted to dip my toes into Rust.
 It installs quilt, and downloads the following mods (for any version):
 
 - Sodium
+- Iris Shaders
 - Lithium
 - Phosphor
 - Lazydfu

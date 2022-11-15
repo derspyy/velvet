@@ -9,6 +9,7 @@ pub async fn run(mc_version: &String, mut path: PathBuf) {
     let modrinth = Ferinth::default();
     let mods = [
         "AANobbMI", // sodium
+        "YL57xq9U", // iris
         "gvQqBUqZ", // lithium
         "hEOCdOgW", // phosphor
         "hvFnDODi", // lazydfu
