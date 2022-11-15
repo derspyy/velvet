@@ -12,11 +12,10 @@ env:
 
 jobs:
   build:
-
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-          os: [windows-latest, ubuntu-latest, macos-latest]
+          os: [ubuntu-latest, macos-latest]
     steps:
     - uses: actions/checkout@v3
     - name: Build
@@ -25,4 +24,15 @@ jobs:
       uses: actions/upload-artifact@v3.1.1
       with:
         name: velvet-${{ matrix.os }}
-        path: ${{ '**/velvet-minecraft' || '**/velvet-minecraft.exe'  }}
+        path: "**/velvet-minecraft" 
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --release --verbose
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: velvet-windows
+        path: "**/velvet-minecraft.exe" 
