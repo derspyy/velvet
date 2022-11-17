@@ -1,4 +1,4 @@
-use std::{fs::File, io::{Write, Seek}, error::Error};
+use std::{fs::File, io::{Write, Seek}};
 use reqwest::blocking::Client;
 use serde_json::json;
 use chrono::Utc;

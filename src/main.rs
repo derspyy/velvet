@@ -1,6 +1,6 @@
 use std::io;
 
-use serde_json::{json, Value, to_string};
+use serde_json::Value;
 use colored::Colorize;
 
 mod install_velvet;
