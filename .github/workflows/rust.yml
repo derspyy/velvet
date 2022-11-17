@@ -11,11 +11,20 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-          os: [ubuntu-latest, macos-latest]
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: rui314/setup-mold@v1
+    - name: Build
+      run: cargo build --release --verbose
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: velvet-linux
+        path: "**/target/release/velvet-minecraft" 
+  build-macos:
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
     - name: Build
@@ -23,8 +32,8 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.1
       with:
-        name: velvet-${{ matrix.os }}
-        path: "**/velvet-minecraft" 
+        name: velvet-macos
+        path: "**/target/release/velvet-minecraft" 
   build-windows:
     runs-on: windows-latest
     steps:
@@ -35,4 +44,4 @@ jobs:
       uses: actions/upload-artifact@v3.1.1
       with:
         name: velvet-windows
-        path: "**/velvet-minecraft.exe" 
+        path: "**/target/release/velvet-minecraft.exe" 
