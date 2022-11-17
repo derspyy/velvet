@@ -8,7 +8,7 @@ pub fn write_version(mc: &String, velvet: &String, z: &File) {
 
     let url = format!("https://meta.quiltmc.org/v3/versions/loader/{}/{}/profile/json", &mc, &velvet);
     let client = Client::new();
-    let mut json: serde_json::Value = client
+    let json: serde_json::Value = client
             .get(&url)
             .header("User-Agent", "Velvet")
             .send()
@@ -16,12 +16,13 @@ pub fn write_version(mc: &String, velvet: &String, z: &File) {
             .json()
             .unwrap();
 
-    // Quilt Installer Hack
+    /*
+    Quilt Installer Hack
     json["libraries"][11] = json!({
     "name": (format!("net.fabricmc:intermediary:{}", &mc)),
     "url": "https://maven.fabricmc.net/"
     });
-    // TODO: remove this asap
+    */
 
     serde_json::to_writer_pretty(z, &json).unwrap();
 }
@@ -68,7 +69,7 @@ fn get_release(x: &serde_json::Value) -> Option<String> {
 }
 fn get_version<'a>(x: &'a serde_json::Value,y: &'a Option<String>) -> &'a serde_json::Value {
     match y {
-        Some(z) => &x["profiles"][&z]["javaArgs"],
+        Some(z) => &x["profiles"][&z]["javaDir"],
         None => &json!(null)
     }
 }
