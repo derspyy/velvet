@@ -1,7 +1,7 @@
 use colored::Colorize;
 
 use crate::{get_minecraft_dir, write_json};
-use std::fs::{File, OpenOptions};
+use std::fs::{File, OpenOptions, remove_file, rename};
 use std::path::PathBuf;
 use std::{fs, io};
 
@@ -64,14 +64,16 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
     mc_path.push("launcher_profiles");
     mc_path.set_extension("json");
 
-    let profile = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open(&mc_path)
-        .expect("Couldn't add the Velvet profile. Is your minecraft directory protected?");
+    let mut temp_path = PathBuf::from(&mc_path);
+    temp_path.set_extension("temp");
 
-    write_json::write_profile(&mc_version, &quilt_version, &profile);
+    let read_profile = File::open(&mc_path).expect("Couldn't read. Are you using the official minecraft launcher?");
+    let write_profile = File::create(&temp_path).expect("Couldn't write your profile. Is your minecraft directory protected?");
+
+    write_json::write_profile(&mc_version, &quilt_version, &read_profile, &write_profile);
+
+    remove_file(&mc_path);
+    rename(&temp_path, &mc_path);
 
     path_mods
 }
