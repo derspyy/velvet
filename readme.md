@@ -1,6 +1,4 @@
-# Velvet
-
-![Icon](docs/icon.png)
+# ![Icon](docs/icon.png) Velvet for Minecraft 
 
 ^ Cute icon by my friend [Aria](https://twitter.com/sepiaclockworks).
 
