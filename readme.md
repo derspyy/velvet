@@ -16,7 +16,7 @@ It installs Quilt, and downloads the following mods (for any version, if availab
 - [Iris Shaders](https://modrinth.com/mod/iris)
 - [Lithium](https://modrinth.com/mod/lithium)
 - [Phosphor](https://modrinth.com/mod/phosphor)
-- [Lazydfu](https://modrinth.com/mod/lazydfu)
+- [LazyDFU](https://modrinth.com/mod/lazydfu)
 - [Ferritecore](https://modrinth.com/mod/ferrite-core)
 - [Krypton](https://modrinth.com/mod/krypton)
 - [Smooth Boot](https://modrinth.com/mod/smoothboot-fabric)
