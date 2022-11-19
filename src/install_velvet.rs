@@ -1,7 +1,7 @@
 use colored::Colorize;
 
 use crate::{get_minecraft_dir, write_json};
-use std::fs::{File, OpenOptions, remove_file, rename};
+use std::fs::{File, remove_file, rename};
 use std::path::PathBuf;
 use std::{fs, io};
 
