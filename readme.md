@@ -1,24 +1,24 @@
-# ![Icon](docs/icon.png) Velvet for Minecraft 
+# ![Icon](docs/icon.png) Velvet for Minecraft
 
 ^ Cute icon by my friend [Aria](https://twitter.com/sepiaclockworks).
 
-|[Download](https://nightly.link/derspyy/velvet/workflows/rust/main)|
-|--|
+|[Download ⬇️](https://nightly.link/derspyy/velvet/workflows/rust/main)|
+|-|
 
-This is a Quilt Installer that installs (imo) essential Minecraft mods.
-I made it because I know people that dislike manually installing Quilt and downloading optimization mods from Modrinth.
+This is a [Quilt](https://quiltmc.org) Installer that installs (imo) essential Minecraft mods.
+I made it because I know people that dislike manually installing Quilt and downloading optimization mods from [Modrinth](https://modrinth.com).
 
 It's also a hobby project, since I wanted to dip my toes into Rust.
 
-It installs quilt, and downloads the following mods (for any version, if available):
+It installs Quilt, and downloads the following mods (for any version, if available):
 
-- Sodium
-- Iris Shaders
-- Lithium
-- Phosphor
-- Lazydfu
-- Ferritecore
-- Krypton
-- Smooth Boot
+- [Sodium](https://modrinth.com/mod/AANobbMI)
+- [Iris Shaders](https://modrinth.com/mod/iris)
+- [Lithium](https://modrinth.com/mod/lithium)
+- [Phosphor](https://modrinth.com/mod/phosphor)
+- [Lazydfu](https://modrinth.com/mod/lazydfu)
+- [Ferritecore](https://modrinth.com/mod/ferrite-core)
+- [Krypton](https://modrinth.com/mod/krypton)
+- [Smooth Boot](https://modrinth.com/mod/smoothboot-fabric)
 
 I built it in a way that makes it easy to add mod lists, so that I can improve it later with, possibly, multiple profiles, or maybe custom profiles? Who knows.
