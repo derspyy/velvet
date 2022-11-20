@@ -18,9 +18,9 @@ pub async fn run(mc_version: &String, mut path: PathBuf) {
         "FWumhS4T", // smoothboot-fabric
         ];
     for x in mods {
-        println!("{} {}","Downloading:".dimmed(), modrinth.get_project(&x).await.unwrap().title.purple());
         let versions = modrinth.list_versions_filtered(&x, Some(&["quilt", "fabric"]),  Some(&[&mc_version.as_str()]), None).await.unwrap();
         if versions.len() != 0 {
+            println!("{} {}","Downloading:".dimmed(), modrinth.get_project(&x).await.unwrap().title.purple());
             let url = versions[0].files[0].url.to_owned();
             let mut file_name = url
                     .path_segments()
@@ -35,7 +35,7 @@ pub async fn run(mc_version: &String, mut path: PathBuf) {
             mod_file.write_all(&download).unwrap();
             path.pop();
         } else {
-            return
+            println!("{} {} {} {}","The mod".dimmed(), modrinth.get_project(&x).await.unwrap().title.purple(), "is not available for".dimmed(), &mc_version.purple());
         }
     }
 }

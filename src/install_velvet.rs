@@ -59,7 +59,7 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
     write_json::write_version(&mc_version, &quilt_version, &json_file);
     // The above creates it's json.
 
-    println!("Directories created successfully.");
+    println!("{}", "Directories created successfully.".dimmed());
 
     mc_path.push("launcher_profiles");
     mc_path.set_extension("json");

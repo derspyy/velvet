@@ -58,7 +58,7 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File, y: &File) {
 fn get_release(x: &serde_json::Value) -> Option<String> {
     for (name, value) in x["profiles"].as_object().unwrap() {
         if value["type"] == json!("latest-release") {
-            println!("Copying java directory from: {}.", "latest-release".purple().italic());
+            println!("Copying Java directory from: {}.", "latest-release".purple().italic());
             return Some(name.to_owned())
         }
     }

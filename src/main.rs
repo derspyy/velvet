@@ -11,7 +11,6 @@ mod front_end;
 
 fn main() {
     println!("Welcome to {}!", "Velvet".purple().bold());
-    println!("{}", "CLOSE THE MINECRAFT LAUNCHER!".red().bold().underline());
     let version_response: Value = reqwest::blocking::get("https://meta.quiltmc.org/v3/versions/loader")
         .expect("Failed to fetch latest Quilt version.")
         .json()
@@ -27,7 +26,11 @@ fn main() {
     println!("Selected version: {}", &mc_version.purple().italic());
     let path_mods = install_velvet::run(&mc_version, &quilt_version.to_string());
     get_mods::run(&mc_version, path_mods);
-    println!("Done. Enjoy!")
+    println!("Done. Enjoy! {}", "Don't forget to restart the minecraft launcher.".red().underline());
+
+    // Wait for Return
+    println!("{}", "Press enter to exit.".dimmed());
+    let _exit = io::stdin().read_line(&mut mc_version).unwrap();
 }
 
 pub fn rm_newline(mut x: String) -> String {
