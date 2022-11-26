@@ -1,7 +1,7 @@
 use std::io;
 
 use serde_json::Value;
-use colored::Colorize;
+use colored::{Colorize, control};
 
 mod install_velvet;
 mod get_minecraft_dir;
@@ -10,6 +10,10 @@ pub mod write_json;
 mod front_end;
 
 fn main() {
+
+    #[cfg(target_os = "windows")]
+    control::set_virtual_terminal(true).unwrap();
+
     println!("Welcome to {}!", "Velvet".purple().bold());
     let version_response: Value = reqwest::blocking::get("https://meta.quiltmc.org/v3/versions/loader")
         .expect("Failed to fetch latest Quilt version.")
