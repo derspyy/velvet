@@ -22,7 +22,7 @@ jobs:
       uses: actions/upload-artifact@v3.1.1
       with:
         name: velvet-linux
-        path: "**/target/release/velvet-minecraft" 
+        path: "target/release/velvet-minecraft" 
   build-macos:
     runs-on: macos-latest
     steps:
@@ -33,7 +33,7 @@ jobs:
       uses: actions/upload-artifact@v3.1.1
       with:
         name: velvet-macos
-        path: "**/target/release/velvet-minecraft" 
+        path: "target/release/velvet-minecraft" 
   build-windows:
     runs-on: windows-latest
     steps:
@@ -44,4 +44,4 @@ jobs:
       uses: actions/upload-artifact@v3.1.1
       with:
         name: velvet-windows
-        path: "**/target/release/velvet-minecraft.exe" 
+        path: "target/release/velvet-minecraft.exe" 
