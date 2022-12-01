@@ -7,7 +7,6 @@ mod install_velvet;
 mod get_minecraft_dir;
 mod get_mods;
 pub mod write_json;
-mod front_end;
 
 fn main() {
 
