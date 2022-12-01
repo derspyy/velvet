@@ -27,7 +27,7 @@ pub fn write_version(mc: &String, velvet: &String, z: &File) {
     serde_json::to_writer_pretty(z, &json).unwrap();
 }
 
-pub fn write_profile(mc: &String, velvet: &String, x: &File, y: &File) {
+pub fn write_profile(mc: &String, velvet: &String, x: &File) -> String {
     let mut json: serde_json::Value = serde_json::from_reader(x).unwrap();
 
     // This copies the "Latest Release" java arguments and version.
@@ -53,7 +53,7 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File, y: &File) {
         "type": "custom",
 
     });
-    serde_json::to_writer_pretty(y, &json).unwrap();
+    serde_json::to_string_pretty(&json).unwrap()
 }
 fn get_release(x: &serde_json::Value) -> Option<String> {
     for (name, value) in x["profiles"].as_object().unwrap() {

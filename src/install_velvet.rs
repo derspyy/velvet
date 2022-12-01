@@ -1,9 +1,10 @@
 use colored::Colorize;
 
 use crate::{get_minecraft_dir, write_json};
-use std::fs::{File, remove_file, rename};
+use std::fs::File;
 use std::path::PathBuf;
 use std::{fs, io};
+use std::io::Write;
 
 #[allow(unused_must_use)]
 pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
@@ -35,10 +36,6 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
     fs::remove_dir_all(&path_mods);
     fs::create_dir_all(&path_mods);
 
-    let mut path_loader = PathBuf::from(&velvet_path);
-    path_loader.push("loader");
-    fs::create_dir(&path_loader);
-
     println!("Installing Quilt Loader for version: {}", &mc_version.purple().italic());
 
     let version_folder_name = format!("quilt-loader-{}-{}", &quilt_version, &mc_version);
@@ -64,21 +61,16 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
     mc_path.push("launcher_profiles");
     mc_path.set_extension("json");
 
-    let mut temp_path = PathBuf::from(&mc_path);
-    temp_path.set_extension("temp");
+    let mut launcher_file = File::open(&mc_path).expect("Couldn't read. Are you using the official minecraft launcher?");
+    let profile = write_json::write_profile(&mc_version, &quilt_version, &launcher_file);
 
-    let read_profile = File::open(&mc_path).expect("Couldn't read. Are you using the official minecraft launcher?");
-    let write_profile = File::create(&temp_path).expect("Couldn't write your profile. Is your minecraft directory protected?");
-
-    write_json::write_profile(&mc_version, &quilt_version, &read_profile, &write_profile);
-
-    remove_file(&mc_path);
-    rename(&temp_path, &mc_path);
+    launcher_file = File::create(&mc_path).expect("Couldn't write your profile. Is your minecraft directory protected?");
+    write!(&mut launcher_file, "{}", &profile).unwrap();
 
     path_mods
 }
 
 fn add_extension(x: PathBuf) -> PathBuf {
-    let y = String::from(x.into_os_string().into_string().unwrap() + ".jar");
+    let y = String::from(x.into_os_string().into_string().unwrap() + ".ext");
     PathBuf::from(&y)
 }
