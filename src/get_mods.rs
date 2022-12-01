@@ -4,20 +4,21 @@ use colored::Colorize;
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
 
+const MODS: [&str; 8] = [
+"AANobbMI", // sodium
+"YL57xq9U", // iris
+"gvQqBUqZ", // lithium
+"hEOCdOgW", // phosphor
+"hvFnDODi", // lazydfu
+"uXXizFIs", // ferrite-core
+"fQEb0iXm", // krypton
+"FWumhS4T", // smoothboot-fabric
+];
+
 #[tokio::main]
 pub async fn run(mc_version: &String, mut path: PathBuf) {
     let modrinth = Ferinth::default();
-    let mods = [
-        "AANobbMI", // sodium
-        "YL57xq9U", // iris
-        "gvQqBUqZ", // lithium
-        "hEOCdOgW", // phosphor
-        "hvFnDODi", // lazydfu
-        "uXXizFIs", // ferrite-core
-        "fQEb0iXm", // krypton
-        "FWumhS4T", // smoothboot-fabric
-        ];
-    for x in mods {
+    for x in MODS {
         let versions = modrinth.list_versions_filtered(&x, Some(&["quilt", "fabric"]),  Some(&[&mc_version.as_str()]), None).await.unwrap();
         if versions.len() != 0 {
             println!("{} {}","Downloading:".dimmed(), modrinth.get_project(&x).await.unwrap().title.purple());
