@@ -15,6 +15,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            path: "target/release/velvet-minecraft"
+          - os: macos-latest
+            path: "target/release/velvet-minecraft"
+          - os: windows-latest
+            path: "target/release/velvet-minecraft.exe"
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
