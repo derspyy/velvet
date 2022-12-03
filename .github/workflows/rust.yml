@@ -27,19 +27,12 @@ jobs:
     - uses: actions/checkout@v3
     - name: Rust Cache
       uses: Swatinem/rust-cache@v2.2.0
-    - if: ${{ matrix.os }} = 'ubuntu-latest'
+    - if: ${{ matrix.os }} == 'ubuntu-latest'
       uses: rui314/setup-mold@v1
     - name: Build
       run: cargo build --release --verbose
     - name: Upload a Build Artifact
-      if: ${{ matrix.os }} == 'windows-latest'
       uses: actions/upload-artifact@v3.1.1
       with:
         name: velvet-${{ matrix.os }}
-        path: "target/release/velvet-minecraft.exe"
-    - name: Upload a Build Artifact
-      if: ${{ matrix.os }} != 'windows-latest'
-      uses: actions/upload-artifact@v3.1.1
-      with:
-        name: velvet-${{ matrix.os }}
-        path: "target/release/velvet-minecraft"
+        path: ${{ matrix.path }}
