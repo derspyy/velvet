@@ -11,37 +11,28 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build-ubuntu:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
-    - uses: rui314/setup-mold@v1
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2.2.0
+    - if: ${{ matrix.os }} = 'ubuntu-latest'
+      uses: rui314/setup-mold@v1
     - name: Build
       run: cargo build --release --verbose
     - name: Upload a Build Artifact
+      if: ${{ matrix.os }} == 'windows-latest'
       uses: actions/upload-artifact@v3.1.1
       with:
-        name: velvet-linux
-        path: "target/release/velvet-minecraft" 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --release --verbose
+        name: velvet-${{ matrix.os }}
+        path: "target/release/velvet-minecraft.exe"
     - name: Upload a Build Artifact
+      if: ${{ matrix.os }} != 'windows-latest'
       uses: actions/upload-artifact@v3.1.1
       with:
-        name: velvet-macos
-        path: "target/release/velvet-minecraft" 
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --release --verbose
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.1
-      with:
-        name: velvet-windows
-        path: "target/release/velvet-minecraft.exe" 
+        name: velvet-${{ matrix.os }}
+        path: "target/release/velvet-minecraft"
