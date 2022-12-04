@@ -3,13 +3,16 @@ use reqwest::blocking::Client;
 use chrono::Utc;
 use colored::Colorize;
 use serde::{Serialize, Deserialize};
+use serde_json::Value;
 use std::collections::HashMap;
 
 const VANILLA_ARGS: &str = "-Xmx2G -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
 
 #[derive(Serialize, Deserialize)]
 struct LauncherProfiles {
-    profiles: HashMap<String, Profiles>
+    profiles: HashMap<String, Profiles>,
+    settings: Value,
+    version: u8
 }
 
 #[derive(Serialize, Deserialize)]
@@ -17,7 +20,9 @@ struct LauncherProfiles {
 struct Profiles {
     created: String,
     icon: String,
+    #[serde(skip_deserializing)]
     java_args: String,
+    #[serde(skip_deserializing)]
     java_dir: String,
     last_used: String,
     last_version_id: String,
