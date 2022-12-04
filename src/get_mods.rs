@@ -20,12 +20,12 @@ pub async fn run(mc_version: &String, mut path: PathBuf) {
     path.push("mod.jar");
     let modrinth = Ferinth::default();
     for x in MODS {
-        let versions = modrinth.list_versions_filtered(&x, Some(&["quilt", "fabric"]),  Some(&[&mc_version.as_str()]), None).await.unwrap();
+        let versions = modrinth.list_versions_filtered(x, Some(&["quilt", "fabric"]),  Some(&[mc_version.as_str()]), None).await.unwrap();
 
         // Check if there's an available version
         match versions.len() {
             0 => {
-                println!("{} {} {} {}","The mod".dimmed(), modrinth.get_project(&x).await.unwrap().title.purple(), "is not available for".dimmed(), &mc_version.purple());
+                println!("{} {} {} {}","The mod".dimmed(), modrinth.get_project(x).await.unwrap().title.purple(), "is not available for".dimmed(), &mc_version.purple());
             },
             _ => {
                 let url = versions[0].files[0].url.to_owned();
@@ -38,7 +38,7 @@ pub async fn run(mc_version: &String, mut path: PathBuf) {
                 file_name = percent_decode_str(&file_name).decode_utf8().unwrap().into_owned();
                 path.set_file_name(&file_name);
 
-                println!("{} {}", "Downloading:".dimmed(), modrinth.get_project(&x).await.unwrap().title.purple());
+                println!("{} {}", "Downloading:".dimmed(), modrinth.get_project(x).await.unwrap().title.purple());
                 let download = reqwest::get(url).await.unwrap().bytes().await.unwrap();
                 let mut mod_file = File::create(&path).unwrap();
                 mod_file.write_all(&download).unwrap();

@@ -8,10 +8,8 @@ use std::io::Write;
 
 #[allow(unused_must_use)]
 pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
-    let mut mc_path = PathBuf::from(&get_minecraft_dir::dir());
-    println!("Testing expected directory...");
-
-    while mc_path.is_dir() == false {
+    let mut mc_path = get_minecraft_dir::dir();
+    while !mc_path.is_dir() {
         println!("Minecraft directory was not found. Enter it's path:");
         let mut temp_path = String::new();
         io::stdin()
@@ -27,12 +25,12 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
 
     let mut path_versions = PathBuf::from(&velvet_path);
     path_versions.push("versions");
-    path_versions.push(&mc_version);
+    path_versions.push(mc_version);
     fs::create_dir_all(&path_versions);
 
     let mut path_mods = PathBuf::from(&velvet_path);
     path_mods.push("mods");
-    path_mods.push(&mc_version);
+    path_mods.push(mc_version);
     fs::remove_dir_all(&path_mods);
     fs::create_dir_all(&path_mods);
 
@@ -53,7 +51,7 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
 
     jar_file.set_extension("json");
     let json_file = File::create(&jar_file).unwrap();
-    write_json::write_version(&mc_version, &quilt_version, &json_file);
+    write_json::write_version(mc_version, quilt_version, &json_file);
     // The above creates it's json.
 
     println!("{}", "Directories created successfully.".dimmed());
@@ -62,7 +60,7 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
     mc_path.set_extension("json");
 
     let mut launcher_file = File::open(&mc_path).expect("Couldn't read. Are you using the official minecraft launcher?");
-    let profile = write_json::write_profile(&mc_version, &quilt_version, &launcher_file);
+    let profile = write_json::write_profile(mc_version, quilt_version, &launcher_file);
 
     launcher_file = File::create(&mc_path).expect("Couldn't write your profile. Is your minecraft directory protected?");
     write!(&mut launcher_file, "{}", &profile).unwrap();
@@ -71,6 +69,6 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
 }
 
 fn add_extension(x: PathBuf) -> PathBuf {
-    let y = String::from(x.into_os_string().into_string().unwrap() + ".ext");
+    let y = x.into_os_string().into_string().unwrap() + ".ext";
     PathBuf::from(&y)
 }

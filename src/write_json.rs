@@ -17,10 +17,10 @@ struct LauncherProfiles {
 
 pub fn write_version(mc: &String, velvet: &String, z: &File) {
 
-    let url = format!("https://meta.quiltmc.org/v3/versions/loader/{}/{}/profile/json", &mc, &velvet);
+    let url = format!("https://meta.quiltmc.org/v3/versions/loader/{}/{}/profile/json", mc, velvet);
     let client = Client::new();
     let json: serde_json::Value = client
-    .get(&url)
+    .get(url)
     .header("User-Agent", "Velvet")
     .send()
     .expect("Couldn't communicate with Quilt's meta server.")
@@ -39,10 +39,10 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File) -> String {
         if x["type"] == "latest-release" {
             println!("Copying Java directory and arguments from: {} profile.", "Latest Release".purple().italic());
             if !x["javaArgs"].is_null() {
-                args = &x["javaArgs"].as_str().unwrap();
+                args = x["javaArgs"].as_str().unwrap();
             }
             if !x["javaDir"].is_null() {
-                dir = &x["javaDir"].as_str().unwrap();
+                dir = x["javaDir"].as_str().unwrap();
             }
             break
         }

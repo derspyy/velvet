@@ -25,7 +25,7 @@ fn main() {
         .unwrap();
     let mut quilt_version = String::new();
     for x in version_response {
-        if x.version.contains("-") == false {
+        if !x.version.contains('-') {
             quilt_version = x.version;
             break
         }
