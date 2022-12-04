@@ -13,12 +13,11 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
         println!("Minecraft directory was not found. Enter it's path:");
         let mut temp_path = String::new();
         io::stdin()
-            .read_line(&mut temp_path)
-            .expect("Couldn't read.");
+        .read_line(&mut temp_path)
+        .expect("Couldn't read.");
         mc_path = PathBuf::from(&temp_path);
     }
-
-    println!("Directory exists.");
+    println!("{}", "Found Minecraft directory".dimmed());
 
     let mut velvet_path = PathBuf::from(&mc_path);
     velvet_path.push(".velvet");
