@@ -45,7 +45,6 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File) -> String {
     // This copies the "Latest Release" java arguments and version.
     let mut args = VANILLA_ARGS;
     let mut dir = "";
-
     for x in json.profiles.values() {
         if x._type == "latest-release" {
             println!("Copying Java directory and arguments from: {} profile.", "Latest Release".purple().italic());
@@ -54,22 +53,18 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File) -> String {
             break
         }
     }
-
     let time = Utc::now();
-
     let new_profile = Profiles {
-    created: time.to_string(),
-    icon: String::from("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAGFBMVEUAAAB7GWmyF1rqR1a3msT/nJfp0+r///+virVnAAAAAXRSTlMAQObYZgAAAI9JREFUKM990cENA0EIQ9FpgRbcglugBVr4Lbj9HCaRNtnZcHwSYMFaa63Vvb7rB5JS8QeiAqCfIA0C6yO/0CFJDQkcgWqSsTIlTpCSSJJoCAdAHqtqY/oOncgz492pIyTInrEK7kDtrci21AeQx+9olxwXWP0e2GRf4AaLRPYOV32CbSVb1TzAtsDloR94AcQTfFFwBa/NAAAAAElFTkSuQmCC"),
-    java_args: format!("-Dloader.modsDir=.velvet/mods/{0} -Dloader.configDir=.velvet/config/{0} {1}", mc, args),
-    java_dir: dir.to_owned(),
-    last_used: time.to_string(),
-    last_version_id: format!("quilt-loader-{}-{}", &velvet, &mc),
-    name: format!("Velvet {}", &mc),
-    _type: "custom".to_owned()
+        created: time.to_string(),
+        icon: String::from("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAGFBMVEUAAAB7GWmyF1rqR1a3msT/nJfp0+r///+virVnAAAAAXRSTlMAQObYZgAAAI9JREFUKM990cENA0EIQ9FpgRbcglugBVr4Lbj9HCaRNtnZcHwSYMFaa63Vvb7rB5JS8QeiAqCfIA0C6yO/0CFJDQkcgWqSsTIlTpCSSJJoCAdAHqtqY/oOncgz492pIyTInrEK7kDtrci21AeQx+9olxwXWP0e2GRf4AaLRPYOV32CbSVb1TzAtsDloR94AcQTfFFwBa/NAAAAAElFTkSuQmCC"),
+        java_args: format!("-Dloader.modsDir=.velvet/mods/{0} -Dloader.configDir=.velvet/config/{0} {1}", mc, args),
+        java_dir: String::from(dir),
+        last_used: time.to_string(),
+        last_version_id: format!("quilt-loader-{}-{}", &velvet, &mc),
+        name: format!("Velvet {}", &mc),
+        _type: String::from("custom")
     };
-
     json.profiles.insert(format!("velvet-quilt-loader-{}", &mc), new_profile);
-
     serde_json::to_string_pretty(&json).unwrap()
 }
 
