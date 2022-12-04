@@ -3,31 +3,16 @@ use reqwest::blocking::Client;
 use chrono::Utc;
 use colored::Colorize;
 use serde::{Serialize, Deserialize};
-use serde_json::Value;
+use serde_json::{Value, json};
 use std::collections::HashMap;
 
 const VANILLA_ARGS: &str = "-Xmx2G -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M";
 
 #[derive(Serialize, Deserialize)]
 struct LauncherProfiles {
-    profiles: HashMap<String, Profiles>,
+    profiles: HashMap<String, Value>,
     settings: Value,
     version: u8
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct Profiles {
-    created: String,
-    icon: String,
-    #[serde(skip_deserializing)]
-    java_args: String,
-    #[serde(skip_deserializing)]
-    java_dir: String,
-    last_used: String,
-    last_version_id: String,
-    name: String,
-    _type: String
 }
 
 pub fn write_version(mc: &String, velvet: &String, z: &File) {
@@ -51,24 +36,30 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File) -> String {
     let mut args = VANILLA_ARGS;
     let mut dir = "";
     for x in json.profiles.values() {
-        if x._type == "latest-release" {
+        if x["type"] == "latest-release" {
             println!("Copying Java directory and arguments from: {} profile.", "Latest Release".purple().italic());
-            args = &x.java_args;
-            dir = &x.java_dir;
+            if !x["javaArgs"].is_null() {
+                args = &x["javaArgs"].as_str().unwrap();
+            }
+            if !x["javaDir"].is_null() {
+                dir = &x["javaDir"].as_str().unwrap();
+            }
             break
         }
     }
     let time = Utc::now();
-    let new_profile = Profiles {
-        created: time.to_string(),
-        icon: String::from("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAGFBMVEUAAAB7GWmyF1rqR1a3msT/nJfp0+r///+virVnAAAAAXRSTlMAQObYZgAAAI9JREFUKM990cENA0EIQ9FpgRbcglugBVr4Lbj9HCaRNtnZcHwSYMFaa63Vvb7rB5JS8QeiAqCfIA0C6yO/0CFJDQkcgWqSsTIlTpCSSJJoCAdAHqtqY/oOncgz492pIyTInrEK7kDtrci21AeQx+9olxwXWP0e2GRf4AaLRPYOV32CbSVb1TzAtsDloR94AcQTfFFwBa/NAAAAAElFTkSuQmCC"),
-        java_args: format!("-Dloader.modsDir=.velvet/mods/{0} -Dloader.configDir=.velvet/config/{0} {1}", mc, args),
-        java_dir: String::from(dir),
-        last_used: time.to_string(),
-        last_version_id: format!("quilt-loader-{}-{}", &velvet, &mc),
-        name: format!("Velvet {}", &mc),
-        _type: String::from("custom")
-    };
+
+    let new_profile = json!({
+        "created": &time,
+        "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAGFBMVEUAAAB7GWmyF1rqR1a3msT/nJfp0+r///+virVnAAAAAXRSTlMAQObYZgAAAI9JREFUKM990cENA0EIQ9FpgRbcglugBVr4Lbj9HCaRNtnZcHwSYMFaa63Vvb7rB5JS8QeiAqCfIA0C6yO/0CFJDQkcgWqSsTIlTpCSSJJoCAdAHqtqY/oOncgz492pIyTInrEK7kDtrci21AeQx+9olxwXWP0e2GRf4AaLRPYOV32CbSVb1TzAtsDloR94AcQTfFFwBa/NAAAAAElFTkSuQmCC",
+        "javaArgs": format!("-Dloader.modsDir=.velvet/mods/{0} -Dloader.configDir=.velvet/config/{0} {1}", &mc, &args),
+        "javaDir": &dir,
+        "lastUsed": &time,
+        "lastVersionId": format!("quilt-loader-{}-{}", &velvet, &mc),
+        "name": format!("Velvet {}", &mc),
+        "type": "custom",
+    });
+
     json.profiles.insert(format!("velvet-quilt-loader-{}", &mc), new_profile);
     serde_json::to_string_pretty(&json).unwrap()
 }
