@@ -2,8 +2,8 @@
 
 ^ Cute icon by my friend [Aria](https://twitter.com/sepiaclockworks).
 
-|[Download ⬇️](https://nightly.link/derspyy/velvet/workflows/rust/main)|
-|-|
+|Download ⬇️|[Windows](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-windows-latest.zip)|[Linux](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-ubuntu-latest.zip)|[MacOS](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-macos-latest.zip)
+|-|-|-|-|
 
 This is a [Quilt](https://quiltmc.org) Installer that installs (imo) essential Minecraft mods.
 I made it because I know people that dislike manually installing Quilt and downloading optimization mods from [Modrinth](https://modrinth.com).
