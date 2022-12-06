@@ -10,15 +10,8 @@ I made it because I know people that dislike manually installing Quilt and downl
 
 It's also a hobby project, since I wanted to dip my toes into Rust.
 
-It installs Quilt, and downloads the following mods (for any version, if available):
+It installs Quilt, and downloads the following modlists (for any version, if available):
 
-- [Sodium](https://modrinth.com/mod/AANobbMI)
-- [Iris Shaders](https://modrinth.com/mod/iris)
-- [Lithium](https://modrinth.com/mod/lithium)
-- [Phosphor](https://modrinth.com/mod/phosphor)
-- [LazyDFU](https://modrinth.com/mod/lazydfu)
-- [Ferritecore](https://modrinth.com/mod/ferrite-core)
-- [Krypton](https://modrinth.com/mod/krypton)
-- [Smooth Boot](https://modrinth.com/mod/smoothboot-fabric)
-
-I built it in a way that makes it easy to add mod lists, so that I can improve it later with, possibly, multiple profiles, or maybe custom profiles? Who knows.
+- **Vanilla**: [Sodium](https://modrinth.com/mod/sodium), [Iris Shaders](https://modrinth.com/mod/iris), [Lithium](https://modrinth.com/mod/lithium), [Phosphor](https://modrinth.com/mod/phosphor), [LazyDFU](https://modrinth.com/mod/lazydfu), [Ferritecore](https://modrinth.com/mod/ferritecore), [Krypton](https://modrinth.com/mod/krypton), [Smooth Boot](https://modrinth.com/mod/smoothboot-fabric)
+- **Visual**: [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights), [Not Enough Animations](https://modrinth.com/mod/not-enough-animations), [Falling Leaves](https://modrinth.com/mod/fallingleaves), [Ears](https://modrinth.com/mod/ears), [CameraOverhaul](cameraoverhaul), [Indium](https://modrinth.com/mod/indium), [LambdaBetterGrass](lambdabettergrass), [Continuity](https://modrinth.com/mod/continuity)
+- **Optifine**: [Puzzle](https://modrinth.com/mod/puzzle), [Animatica](animatica), [Indium](https://modrinth.com/mod/indium), [Cull Leaves](https://modrinth.com/mod/cull-leaves), [Continuity](https://modrinth.com/mod/continuity), [LambdaBetterGrass](https://modrinth.com/mod/lambdabettergrass), [CIT Resewn](https://modrinth.com/mod/cit-resewn), [Entity Texture Features](https://modrinth.com/mod/entitytexturefeatures).
