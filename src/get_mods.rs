@@ -15,13 +15,12 @@ const VANILLA: [&str; 8] = [
     "FWumhS4T", // smoothboot-fabric
 ];
 
-const VISUAL: [&str; 10] = [
+const VISUAL: [&str; 9] = [
                 // effective
     "yBW8D80W", // lambdynamiclights
     "MPCX6s5C", // not-enough-animations
     "WhbRG4iK", // fallingleaves
     "mfzaZK3Z", // ears
-    "m0oRwcZx", // cameraoverhaul
     "Orvt0mRa", // indium
     "2Uev7LdA", // lambdabettergrass
     "1IjD5062", // continuity
