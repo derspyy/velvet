@@ -15,7 +15,7 @@ const VANILLA: [&str; 8] = [
     "FWumhS4T", // smoothboot-fabric
 ];
 
-const VISUAL: [&str; 8] = [
+const VISUAL: [&str; 10] = [
                 // effective
     "yBW8D80W", // lambdynamiclights
     "MPCX6s5C", // not-enough-animations
@@ -25,9 +25,11 @@ const VISUAL: [&str; 8] = [
     "Orvt0mRa", // indium
     "2Uev7LdA", // lambdabettergrass
     "1IjD5062", // continuity
+    "qvIfYCYJ", // qsl
+    "9s6osm5g", // cloth-config
 ];
 
-const OPTIFINE: [&str; 8] = [
+const OPTIFINE: [&str; 9] = [
     "3IuO68q1", // puzzle
     "PRN43VSY", // animatica
     "Orvt0mRa", // indium
@@ -36,6 +38,7 @@ const OPTIFINE: [&str; 8] = [
     "2Uev7LdA", // lambdabettergrass
     "otVJckYQ", // cit-resewn
     "BVzZfTc1", // entitytexturefeatures
+    "qvIfYCYJ", // qsl
 ];
 
 #[tokio::main]
