@@ -33,17 +33,15 @@ fn main() {
     println!("Latest Velvet Quilt version: {}.", &quilt_version.purple().italic());
     println!("Enter minecraft version:");
     let mc_version = input();
-    println!("\nChoose your {}!", "modlists".purple());
+    println!("\nChoose your {}!\n", "modlists".purple());
     println!("{} Only vanilla performance-enhancing modlist.", "vanilla -".purple().bold());
     println!("{} Immersive and beautiful modlist.", "visual -".purple().bold());
-    println!("{} Optifine parity modlist. {}", "optifine .".purple().bold(), "(select this if using optifine-based resource packs)".dimmed());
-
+    println!("{} Optifine parity modlist. {}", "optifine -".purple().bold(), "(select this if using optifine-based resource packs)".dimmed());
     let mut modlists: (bool, bool, bool) = (true, false, false);
 
+    println!("\nEnter the {} to toggle: {}", "modlist's name".purple().bold(), "(Press enter to install)".dimmed());
     loop {
-        println!("\nEnter modlist name: {}", "(return empty input if done)".dimmed());
-
-        println!("{}: {} {}: {} {}: {}",
+        println!("\n{}: {} {}: {} {}: {}",
         "vanilla".purple().bold(), modlists.0,
         "visual".purple().bold(), modlists.1,
         "optifine".purple().bold(), modlists.2);
