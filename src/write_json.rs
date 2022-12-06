@@ -17,7 +17,7 @@ struct LauncherProfiles {
 
 pub fn write_version(mc: &String, velvet: &String, z: &File) {
 
-    let url = format!("https://meta.quiltmc.org/v3/versions/loader/{}/{}/profile/json", mc, velvet);
+    let url = format!("https://meta.quiltmc.org/v3/versions/loader/{mc}/{velvet}/profile/json");
     let client = Client::new();
     let json: serde_json::Value = client
     .get(url)

@@ -4,22 +4,52 @@ use colored::Colorize;
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
 
-const MODS: [&str; 8] = [
-"AANobbMI", // sodium
-"YL57xq9U", // iris
-"gvQqBUqZ", // lithium
-"hEOCdOgW", // phosphor
-"hvFnDODi", // lazydfu
-"uXXizFIs", // ferrite-core
-"fQEb0iXm", // krypton
-"FWumhS4T", // smoothboot-fabric
+const VANILLA: [&str; 8] = [
+    "AANobbMI", // sodium
+    "YL57xq9U", // iris
+    "gvQqBUqZ", // lithium
+    "hEOCdOgW", // phosphor
+    "hvFnDODi", // lazydfu
+    "uXXizFIs", // ferrite-core
+    "fQEb0iXm", // krypton
+    "FWumhS4T", // smoothboot-fabric
+];
+
+const VISUAL: [&str; 8] = [
+                // effective
+    "yBW8D80W", // lambdynamiclights
+    "MPCX6s5C", // not-enough-animations
+    "WhbRG4iK", // fallingleaves
+    "mfzaZK3Z", // ears
+    "m0oRwcZx", // cameraoverhaul
+    "Orvt0mRa", // indium
+    "2Uev7LdA", // lambdabettergrass
+    "1IjD5062", // continuity
+];
+
+const OPTIFINE: [&str; 8] = [
+    "3IuO68q1", // puzzle
+    "PRN43VSY", // animatica
+    "Orvt0mRa", // indium
+    "GNxdLCoP", // cull-leaves
+    "1IjD5062", // continuity
+    "2Uev7LdA", // lambdabettergrass
+    "otVJckYQ", // cit-resewn
+    "BVzZfTc1", // entitytexturefeatures
 ];
 
 #[tokio::main]
-pub async fn run(mc_version: &String, mut path: PathBuf) {
+pub async fn run(mc_version: &String, modlist: &(bool, bool, bool), mut path: PathBuf) {
     path.push("mod.jar");
     let modrinth = Ferinth::default();
-    for x in MODS {
+    let mut mods: Vec<&str> = Vec::new();
+    if modlist.0 { for x in VANILLA { mods.push(x) } }
+    if modlist.1 { for x in VISUAL { mods.push(x) } }
+    if modlist.2 { for x in OPTIFINE { mods.push(x) } }
+    mods.sort();
+    mods.dedup();
+    
+    for x in mods {
         let versions = modrinth.list_versions_filtered(x, Some(&["quilt", "fabric"]),  Some(&[mc_version.as_str()]), None).await.unwrap();
 
         // Check if there's an available version

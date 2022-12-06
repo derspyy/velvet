@@ -32,26 +32,48 @@ fn main() {
     }
     println!("Latest Velvet Quilt version: {}.", &quilt_version.purple().italic());
     println!("Enter minecraft version:");
-    let mut mc_version = String::new();
-    io::stdin()
-        .read_line(&mut mc_version)
-        .expect("Couldn't read.");
-    mc_version = rm_newline(mc_version);
+    let mc_version = input();
+    println!("\nChoose your {}!", "modlists".purple());
+    println!("{} Only vanilla performance-enhancing modlist.", "vanilla -".purple().bold());
+    println!("{} Immersive and beautiful modlist.", "visual -".purple().bold());
+    println!("{} Optifine parity modlist. {}", "optifine .".purple().bold(), "(select this if using optifine-based resource packs)".dimmed());
+
+    let mut modlists: (bool, bool, bool) = (true, false, false);
+
+    loop {
+        println!("\nEnter modlist name: {}", "(return empty input if done)".dimmed());
+
+        println!("{}: {} {}: {} {}: {}",
+        "vanilla".purple().bold(), modlists.0,
+        "visual".purple().bold(), modlists.1,
+        "optifine".purple().bold(), modlists.2);
+
+        let modlist_string = input();
+        match modlist_string.as_str() {
+            "" => { break }
+            "vanilla" => { modlists.0 = !modlists.0 },
+            "visual" => { modlists.1 = !modlists.1 },
+            "optifine" => { modlists.2 = !modlists.2 }
+            _ => { println!("Invalid input!") }
+        }
+    }
+
     let path_mods = install_velvet::run(&mc_version, &quilt_version);
-    get_mods::run(&mc_version, path_mods);
+    get_mods::run(&mc_version, &modlists, path_mods);
     println!("Done. Enjoy! {}", "Don't forget to restart the minecraft launcher.".red().underline());
 
     // Wait for Return
     println!("{}", "Press enter to exit.".dimmed());
-    let _exit = io::stdin().read_line(&mut mc_version).unwrap();
+    io::stdin().read_line(&mut String::new()).unwrap();
 }
 
-pub fn rm_newline(mut x: String) -> String {
-    if x.ends_with('\n') {
+fn input() -> String {
+    let mut x = String::new();
+    io::stdin()
+    .read_line(&mut x)
+    .expect("Couldn't read.");
+    while x.ends_with('\n') || x.ends_with('\r') {
         x.pop();
-        if x.ends_with('\r') {
-            x.pop();
-        }
     }
     x
 }
