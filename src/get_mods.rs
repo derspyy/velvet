@@ -57,7 +57,7 @@ pub async fn run(mc_version: &String, modlist: &(bool, bool, bool), mut path: Pa
         // Check if there's an available version
         match versions.len() {
             0 => {
-                println!("{} {} {} {}","The mod".dimmed(), modrinth.get_project(x).await.unwrap().title.purple(), "is not available for".dimmed(), &mc_version.purple());
+                println!("{} {} {} {}","The mod".red(), modrinth.get_project(x).await.unwrap().title.purple(), "is not available for".red(), &mc_version.purple());
             },
             _ => {
                 let url = versions[0].files[0].url.to_owned();
