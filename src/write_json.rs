@@ -53,13 +53,14 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File) -> String {
         "created": &time,
         "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAGFBMVEUAAAB7GWmyF1rqR1a3msT/nJfp0+r///+virVnAAAAAXRSTlMAQObYZgAAAI9JREFUKM990cENA0EIQ9FpgRbcglugBVr4Lbj9HCaRNtnZcHwSYMFaa63Vvb7rB5JS8QeiAqCfIA0C6yO/0CFJDQkcgWqSsTIlTpCSSJJoCAdAHqtqY/oOncgz492pIyTInrEK7kDtrci21AeQx+9olxwXWP0e2GRf4AaLRPYOV32CbSVb1TzAtsDloR94AcQTfFFwBa/NAAAAAElFTkSuQmCC",
         "javaArgs": format!("-Dloader.modsDir=.velvet/mods/{0} -Dloader.configDir=.velvet/config/{0} {1}", &mc, &args),
-        "javaDir": &dir,
         "lastUsed": &time,
         "lastVersionId": format!("quilt-loader-{}-{}", &velvet, &mc),
         "name": format!("Velvet {}", &mc),
         "type": "custom",
     });
-
+    if !dir.is_empty() {
+        json.profiles.insert(format!("velvet-quilt-loader-{}", &mc), json!({"javaDir": &dir}));
+    }
     json.profiles.insert(format!("velvet-quilt-loader-{}", &mc), new_profile);
     serde_json::to_string_pretty(&json).unwrap()
 }
