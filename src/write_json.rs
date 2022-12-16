@@ -47,8 +47,6 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File) -> String {
         }
     }
     let time = Utc::now();
-
-
     let mut new_profile = HashMap::from([
         ("created", json!(&time)),
         ("icon", json!(ICON)),
@@ -58,7 +56,6 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File) -> String {
         ("name", json!(format!("Velvet {}", &mc))),
         ("type", json!("custom")),
         ]);
-
     if let Value::String(entry) = dir {
         new_profile.insert("javaDir", json!(&entry));
     }
