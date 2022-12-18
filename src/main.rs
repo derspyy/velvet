@@ -14,7 +14,6 @@ struct Versions {
 }
 
 fn main() {
-
     #[cfg(target_os = "windows")]
     control::set_virtual_terminal(true).unwrap();
 
