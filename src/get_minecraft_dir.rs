@@ -9,9 +9,18 @@ pub fn dir() -> PathBuf {
     dir
 }
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(target_os = "linux")]
 pub fn dir() -> PathBuf {
     let mut dir = home_dir().expect("Couldn't read your home directory. Is it protected?");
     dir.push(".minecraft");
+    dir
+}
+
+#[cfg(target_os = "macos")]
+pub fn dir() -> PathBuf {
+    let mut dir = home_dir().expect("Couldn't read your home directory. Is it protected?");
+    dir.push("Library");
+    dir.push("Application Support");
+    dir.push("minecraft");
     dir
 }
