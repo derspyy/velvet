@@ -4,9 +4,8 @@ use colored::Colorize;
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
 
-const VANILLA: [&str; 8] = [
+const VANILLA: [&str; 7] = [
     "AANobbMI", // sodium
-    "YL57xq9U", // iris
     "gvQqBUqZ", // lithium
     "hEOCdOgW", // phosphor
     "hvFnDODi", // lazydfu
@@ -15,7 +14,7 @@ const VANILLA: [&str; 8] = [
     "FWumhS4T", // smoothboot-fabric
 ];
 
-const VISUAL: [&str; 9] = [
+const VISUAL: [&str; 10] = [
                 // effective
     "yBW8D80W", // lambdynamiclights
     "MPCX6s5C", // not-enough-animations
@@ -26,6 +25,7 @@ const VISUAL: [&str; 9] = [
     "1IjD5062", // continuity
     "qvIfYCYJ", // qsl
     "9s6osm5g", // cloth-config
+    "YL57xq9U", // iris
 ];
 
 const OPTIFINE: [&str; 9] = [
