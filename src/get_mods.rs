@@ -4,7 +4,7 @@ use colored::Colorize;
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
 
-const VANILLA: [&str; 7] = [
+const VANILLA: [&str; 8] = [
     "AANobbMI", // sodium
     "gvQqBUqZ", // lithium
     "hEOCdOgW", // phosphor
@@ -12,6 +12,7 @@ const VANILLA: [&str; 7] = [
     "uXXizFIs", // ferrite-core
     "fQEb0iXm", // krypton
     "FWumhS4T", // smoothboot-fabric
+    "5ZwdcRci", // immediatelyfast
 ];
 
 const VISUAL: [&str; 10] = [
