@@ -1,23 +1,20 @@
-use colored::Colorize;
-
 use crate::{get_minecraft_dir, write_json};
+use std::io::Write;
 use std::fs::File;
 use std::path::PathBuf;
 use std::{fs, io};
-use std::io::Write;
+
 
 #[allow(unused_must_use)]
 pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
     let mut mc_path = get_minecraft_dir::dir();
     while !mc_path.is_dir() {
-        println!("Minecraft directory was not found. Enter it's path:");
         let mut temp_path = String::new();
         io::stdin()
-        .read_line(&mut temp_path)
-        .expect("Couldn't read.");
+            .read_line(&mut temp_path)
+            .expect("Couldn't read.");
         mc_path = PathBuf::from(&temp_path);
     }
-    println!("{}", "Found Minecraft directory".dimmed());
 
     let mut velvet_path = PathBuf::from(&mc_path);
     velvet_path.push(".velvet");
@@ -32,8 +29,6 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
     path_mods.push(mc_version);
     fs::remove_dir_all(&path_mods);
     fs::create_dir_all(&path_mods);
-
-    println!("Installing Quilt Loader for version: {}", &mc_version.purple().italic());
 
     let version_folder_name = format!("quilt-loader-{}-{}", &quilt_version, &mc_version);
     let mut path_version = PathBuf::from(&mc_path);
@@ -53,15 +48,15 @@ pub fn run(mc_version: &String, quilt_version: &String) -> PathBuf {
     write_json::write_version(mc_version, quilt_version, &json_file);
     // The above creates it's json.
 
-    println!("{}", "Directories created successfully.".dimmed());
-
     mc_path.push("launcher_profiles");
     mc_path.set_extension("json");
 
-    let mut launcher_file = File::open(&mc_path).expect("Couldn't read. Are you using the official minecraft launcher?");
+    let mut launcher_file = File::open(&mc_path)
+        .expect("Couldn't read. Are you using the official minecraft launcher?");
     let profile = write_json::write_profile(mc_version, quilt_version, &launcher_file);
 
-    launcher_file = File::create(&mc_path).expect("Couldn't write your profile. Is your minecraft directory protected?");
+    launcher_file = File::create(&mc_path)
+        .expect("Couldn't write your profile. Is your minecraft directory protected?");
     write!(&mut launcher_file, "{}", &profile).unwrap();
 
     path_mods
