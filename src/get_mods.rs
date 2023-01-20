@@ -1,8 +1,8 @@
 use std::{fs::File, io::Write, path::PathBuf};
 
+use anyhow::{anyhow, Result};
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
-use anyhow::{Result, anyhow};
 
 const VANILLA: [&str; 8] = [
     "AANobbMI", // sodium
@@ -42,24 +42,39 @@ const OPTIFINE: [&str; 9] = [
 ];
 
 #[tokio::main]
-pub async fn run(mc_version: String, modlist: &(bool, bool, bool), mut path: PathBuf) -> Result<()> {
+pub async fn run(
+    mc_version: String,
+    modlist: &(bool, bool, bool),
+    mut path: PathBuf,
+) -> Result<()> {
     path.push("mod.jar");
     let modrinth = Ferinth::default();
     let mut mods: Vec<&str> = Vec::new();
-    if modlist.0 { for x in VANILLA { mods.push(x) } }
-    if modlist.1 { for x in VISUAL { mods.push(x) } }
-    if modlist.2 { for x in OPTIFINE { mods.push(x) } }
+    if modlist.0 {
+        for x in VANILLA {
+            mods.push(x)
+        }
+    }
+    if modlist.1 {
+        for x in VISUAL {
+            mods.push(x)
+        }
+    }
+    if modlist.2 {
+        for x in OPTIFINE {
+            mods.push(x)
+        }
+    }
     mods.sort();
     mods.dedup();
-    
-    
+
     for x in mods {
         let versions = modrinth
             .list_versions_filtered(
-                x, 
-                Some(&["quilt", "fabric"]),  
+                x,
+                Some(&["quilt", "fabric"]),
                 Some(&[mc_version.as_str()]),
-                None
+                None,
             )
             .await?;
 
@@ -69,15 +84,12 @@ pub async fn run(mc_version: String, modlist: &(bool, bool, bool), mut path: Pat
                 .path_segments()
                 .and_then(|segments| segments.last())
                 .and_then(|name| if name.is_empty() { None } else { Some(name) })
-                .ok_or(anyhow!("Couldn't parse file name!"))?
+                .ok_or_else(|| anyhow!("Couldn't parse file name!"))?
                 .to_string();
-            file_name = percent_decode_str(&file_name)
-                .decode_utf8()?
-                .into_owned();
+            file_name = percent_decode_str(&file_name).decode_utf8()?.into_owned();
             path.set_file_name(&file_name);
 
-            let download = ureq::get(url.as_str())
-                .call()?;
+            let download = ureq::get(url.as_str()).call()?;
             let mut bytes = Vec::new();
             download.into_reader().read_to_end(&mut bytes)?;
             let mut mod_file = File::create(&path)?;

@@ -1,17 +1,16 @@
 use crate::{get_minecraft_dir, write_json};
-use std::io::Write;
+use anyhow::Result;
 use std::fs::File;
+use std::io::Write;
 use std::path::PathBuf;
 use std::{fs, io};
-use anyhow::Result;
 
 #[allow(unused_must_use)]
 pub fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf> {
     let mut mc_path = get_minecraft_dir::dir()?;
     while !mc_path.is_dir() {
         let mut temp_path = String::new();
-        io::stdin()
-            .read_line(&mut temp_path)?;
+        io::stdin().read_line(&mut temp_path)?;
         mc_path = PathBuf::from(&temp_path);
     }
 

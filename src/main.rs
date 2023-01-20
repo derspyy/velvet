@@ -9,7 +9,10 @@ mod install_velvet;
 pub mod write_json;
 
 use iced::widget::{button, checkbox, column, pick_list, text, vertical_space};
-use iced::{executor, theme::Palette, window, Alignment, Application, Color, Command, Element, Length, Settings, Theme};
+use iced::{
+    executor, theme::Palette, window, Alignment, Application, Color, Command, Element, Length,
+    Settings, Theme,
+};
 
 #[derive(Deserialize)]
 struct Versions {
@@ -18,12 +21,15 @@ struct Versions {
 }
 
 pub fn main() -> iced::Result {
-    
     let mut vec1 = Vec::new();
     let mut vec2 = Vec::new();
-    
-    let response: Vec<Versions> = ureq::get("https://meta.quiltmc.org/v3/versions/game").call().expect("Couldn't get versions.").into_json().unwrap();
-    
+
+    let response: Vec<Versions> = ureq::get("https://meta.quiltmc.org/v3/versions/game")
+        .call()
+        .expect("Couldn't get versions.")
+        .into_json()
+        .unwrap();
+
     for value in response {
         if value.stable {
             vec1.push(value.version.clone())
@@ -31,7 +37,7 @@ pub fn main() -> iced::Result {
         vec2.push(value.version)
     }
     let vec = (vec1, vec2);
-    
+
     Velvet::run(Settings {
         flags: vec,
         window: window::Settings {
@@ -71,7 +77,6 @@ pub enum Message {
 }
 
 impl Application for Velvet {
-
     type Executor = executor::Default;
     type Message = Message;
     type Theme = Theme;
@@ -110,29 +115,26 @@ impl Application for Velvet {
                 Some(value) => {
                     self.message = String::from("Installing...");
                     let values = (self.vanilla, self.beauty, self.optifine);
-                    return Command::perform(run(value.clone(), values), Message::Done) 
+                    return Command::perform(run(value.clone(), values), Message::Done);
                 }
                 None => self.message = String::from("No version selected"),
             },
             Message::Done(value) => match value {
                 Ok(_) => self.message = String::from("Finished!"),
                 Err(x) => self.message = x,
-            } 
+            },
         }
         Command::none()
     }
 
     fn view(&self) -> Element<Message> {
-        
         let list = match self.snapshot {
-            false => {
-                pick_list(&self.version_list.0, self.version.clone(), Message::Update).width(Length::Units(200))
-            },
-            true => {
-                pick_list(&self.version_list.1, self.version.clone(), Message::Update).width(Length::Units(200))
-            },
+            false => pick_list(&self.version_list.0, self.version.clone(), Message::Update)
+                .width(Length::Units(200)),
+            true => pick_list(&self.version_list.1, self.version.clone(), Message::Update)
+                .width(Length::Units(200)),
         };
-        
+
         column![
             vertical_space(Length::Units(10)),
             text("Enter Minecraft version:").size(20),
@@ -141,11 +143,23 @@ impl Application for Velvet {
             vertical_space(Length::Units(5)),
             checkbox("Snapshot", self.snapshot, Message::Snapshot),
             vertical_space(Length::Fill),
-            checkbox("Vanilla - Performance enhancing modlist.", self.vanilla, Message::VButton),
+            checkbox(
+                "Vanilla - Performance enhancing modlist.",
+                self.vanilla,
+                Message::VButton
+            ),
             vertical_space(Length::Units(5)),
-            checkbox("Beauty - Immersive and beautiful modlist.", self.beauty, Message::BButton),
+            checkbox(
+                "Beauty - Immersive and beautiful modlist.",
+                self.beauty,
+                Message::BButton
+            ),
             vertical_space(Length::Units(5)),
-            checkbox("Optifine - Optifine resource pack parity.", self.optifine, Message::OButton),
+            checkbox(
+                "Optifine - Optifine resource pack parity.",
+                self.optifine,
+                Message::OButton
+            ),
             vertical_space(Length::Fill),
             button(self.message.as_str()).on_press(Message::Press),
             vertical_space(Length::Units(10)),
@@ -173,13 +187,12 @@ struct Response {
 }
 
 async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<(), String> {
-    
     let response: Vec<Response> = ureq::get("https://meta.quiltmc.org/v3/versions/loader")
         .call()
-        .map_err(|e| format!("{e}") )?
+        .map_err(|e| format!("{e}"))?
         .into_json()
-        .map_err(|e| format!("{e}") )?;
-    
+        .map_err(|e| format!("{e}"))?;
+
     let mut quilt_version = String::new();
     for x in response {
         if !x.version.contains('-') {
@@ -188,10 +201,7 @@ async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<(), Str
         }
     }
 
-    let path_mods = install_velvet::run(&mc_version, &quilt_version)
-        .map_err(|e| format!("{e}") )?;
-    get_mods::run(mc_version, &modlists, path_mods)
-        .map_err(|e| format!("{e}") )?;
+    let path_mods = install_velvet::run(&mc_version, &quilt_version).map_err(|e| format!("{e}"))?;
+    get_mods::run(mc_version, &modlists, path_mods).map_err(|e| format!("{e}"))?;
     Ok(())
 }
-
