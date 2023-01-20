@@ -2,7 +2,7 @@ use std::{fs::File, io::Write, path::PathBuf};
 
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 const VANILLA: [&str; 8] = [
     "AANobbMI", // sodium
@@ -61,31 +61,27 @@ pub async fn run(mc_version: String, modlist: &(bool, bool, bool), mut path: Pat
                 Some(&[mc_version.as_str()]),
                 None
             )
-            .await
-            .unwrap();
+            .await?;
 
-        // Check if there's an available version
         if !versions.is_empty() {
             let url = versions[0].files[0].url.to_owned();
             let mut file_name = url
                 .path_segments()
                 .and_then(|segments| segments.last())
                 .and_then(|name| if name.is_empty() { None } else { Some(name) })
-                .unwrap()
+                .ok_or(anyhow!("Couldn't parse file name!"))?
                 .to_string();
             file_name = percent_decode_str(&file_name)
-                .decode_utf8()
-                .unwrap()
+                .decode_utf8()?
                 .into_owned();
             path.set_file_name(&file_name);
 
             let download = ureq::get(url.as_str())
-                .call()
-                .unwrap();
+                .call()?;
             let mut bytes = Vec::new();
-            download.into_reader().read_to_end(&mut bytes).unwrap();
-            let mut mod_file = File::create(&path).unwrap();
-            mod_file.write_all(&bytes).unwrap();
+            download.into_reader().read_to_end(&mut bytes)?;
+            let mut mod_file = File::create(&path)?;
+            mod_file.write_all(&bytes)?;
         }
     }
     Ok(())

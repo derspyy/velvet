@@ -7,7 +7,7 @@ use anyhow::Result;
 
 #[allow(unused_must_use)]
 pub fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf> {
-    let mut mc_path = get_minecraft_dir::dir();
+    let mut mc_path = get_minecraft_dir::dir()?;
     while !mc_path.is_dir() {
         let mut temp_path = String::new();
         io::stdin()
@@ -34,16 +34,13 @@ pub fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf> {
     path_version.push("versions");
     path_version.push(&version_folder_name);
     fs::create_dir_all(&path_version);
-    // The above creates it's folder version.
 
     path_version.push(format!("{}.jar", &version_folder_name));
-    fs::File::create(&path_version);
-    // The above creates it's dummy jar.
+    fs::File::create(&path_version); // Dummy jar required by the launcher
 
     path_version.set_extension("json");
     let json_file = File::create(&path_version)?;
     write_json::write_version(mc_version, quilt_version, &json_file);
-    // The above creates it's json.
 
     mc_path.push("launcher_profiles");
     mc_path.set_extension("json");

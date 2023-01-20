@@ -1,26 +1,29 @@
 #[allow(unused_imports)]
-use dirs::{config_dir, home_dir};
+use home::home_dir;
+use anyhow::{Result, anyhow};
 use std::path::PathBuf;
 
 #[cfg(target_os = "windows")]
-pub fn dir() -> PathBuf {
-    let mut dir = config_dir().expect("Couldn't read your config directory. Is it protected?");
+pub fn dir() -> Result<PathBuf> {
+    let mut dir = home_dir().ok_or(anyhow!("Couldn't find home directory!"))?;
+    dir.push("AppData");
+    dir.push("Roaming");
     dir.push(".minecraft");
-    dir
+    Ok(dir)
 }
 
 #[cfg(target_os = "linux")]
-pub fn dir() -> PathBuf {
-    let mut dir = home_dir().expect("Couldn't read your home directory. Is it protected?");
+pub fn dir() -> Result<PathBuf> {
+    let mut dir = home_dir().ok_or(anyhow!("Couldn't find home directory!"))?;
     dir.push(".minecraft");
-    dir
+    Ok(dir)
 }
 
 #[cfg(target_os = "macos")]
-pub fn dir() -> PathBuf {
-    let mut dir = home_dir().expect("Couldn't read your home directory. Is it protected?");
+pub fn dir() -> Result<PathBuf> {
+    let mut dir = home_dir().ok_or(anyhow!("Couldn't find home directory!"))?;
     dir.push("Library");
     dir.push("Application Support");
     dir.push("minecraft");
-    dir
+    Ok(dir)
 }
