@@ -2,6 +2,7 @@ use std::{fs::File, io::Write, path::PathBuf};
 
 use ferinth::Ferinth;
 use percent_encoding::percent_decode_str;
+use anyhow::Result;
 
 const VANILLA: [&str; 8] = [
     "AANobbMI", // sodium
@@ -41,7 +42,7 @@ const OPTIFINE: [&str; 9] = [
 ];
 
 #[tokio::main]
-pub async fn run(mc_version: &str, modlist: &(bool, bool, bool), mut path: PathBuf) {
+pub async fn run(mc_version: String, modlist: &(bool, bool, bool), mut path: PathBuf) -> Result<()> {
     path.push("mod.jar");
     let modrinth = Ferinth::default();
     let mut mods: Vec<&str> = Vec::new();
@@ -51,12 +52,13 @@ pub async fn run(mc_version: &str, modlist: &(bool, bool, bool), mut path: PathB
     mods.sort();
     mods.dedup();
     
+    
     for x in mods {
         let versions = modrinth
             .list_versions_filtered(
                 x, 
                 Some(&["quilt", "fabric"]),  
-                Some(&[mc_version]),
+                Some(&[mc_version.as_str()]),
                 None
             )
             .await
@@ -77,9 +79,14 @@ pub async fn run(mc_version: &str, modlist: &(bool, bool, bool), mut path: PathB
                 .into_owned();
             path.set_file_name(&file_name);
 
-            let download = reqwest::get(url).await.unwrap().bytes().await.unwrap();
+            let download = ureq::get(url.as_str())
+                .call()
+                .unwrap();
+            let mut bytes = Vec::new();
+            download.into_reader().read_to_end(&mut bytes).unwrap();
             let mut mod_file = File::create(&path).unwrap();
-            mod_file.write_all(&download).unwrap();
+            mod_file.write_all(&bytes).unwrap();
         }
     }
+    Ok(())
 }
