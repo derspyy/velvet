@@ -16,7 +16,7 @@ const VANILLA: [&str; 8] = [
 ];
 
 const VISUAL: [&str; 10] = [
-                // effective
+    // effective
     "yBW8D80W", // lambdynamiclights
     "MPCX6s5C", // not-enough-animations
     "WhbRG4iK", // fallingleaves

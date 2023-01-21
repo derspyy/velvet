@@ -7,16 +7,16 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-chrono = "0.4"
+chrono = { version = "0.4", default-features = false }
 ferinth = "2.7"
-ureq = { version = "2.6", features = ["json"] }
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
-percent-encoding = "2.2"
-iced = {version = "0.7", features = [ "image" ]}
+ureq = { version = "2.6", default-features = false, features = ["json"] }
+tokio = { version = "1", default-features = false, features = ["macros", "rt-multi-thread"] }
+percent-encoding = { version = "2.2", default-features = false }
+iced = { version = "0.7", features = [ "image" ] }
 iced_native = "0.7"
-image = "0.24"
+image = { version = "0.24", default-features = false, features = ["png"] } 
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde_json = { version = "1.0", default-features = false }
 home = "0.5"
 
 [profile.release]
