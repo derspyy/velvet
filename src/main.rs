@@ -141,7 +141,7 @@ impl Application for Velvet {
             vertical_space(Length::Units(5)),
             list,
             vertical_space(Length::Units(5)),
-            checkbox("Snapshot", self.snapshot, Message::Snapshot),
+            checkbox("Show snapshots", self.snapshot, Message::Snapshot),
             vertical_space(Length::Fill),
             checkbox(
                 "Vanilla - Performance enhancing modlist.",
