@@ -12,7 +12,7 @@ ferinth = "2.7"
 ureq = { version = "2.6", default-features = false, features = ["json"] }
 tokio = { version = "1", default-features = false, features = ["macros", "rt-multi-thread"] }
 percent-encoding = { version = "2.2", default-features = false }
-iced = { version = "0.7", features = [ "image" ] }
+iced = { version = "0.7", default-features = false, features = [ "image", "glow" ] }
 iced_native = "0.7"
 image = { version = "0.24", default-features = false, features = ["png"] } 
 serde = { version = "1.0", features = ["derive"] }
