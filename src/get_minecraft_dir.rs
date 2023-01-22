@@ -1,5 +1,5 @@
-use anyhow::{anyhow, Result};
 #[allow(unused_imports)]
+use anyhow::{anyhow, Result};
 use home::home_dir;
 use std::path::PathBuf;
 
