@@ -9,7 +9,7 @@ edition = "2021"
 anyhow = "1"
 chrono = { version = "0.4", default-features = false }
 ferinth = "2.7"
-ureq = { version = "2.6", default-features = false, features = ["json"] }
+ureq = { version = "2.6", features = ["json"] }
 tokio = { version = "1", default-features = false, features = ["macros", "rt-multi-thread"] }
 percent-encoding = { version = "2.2", default-features = false }
 iced = { version = "0.7", default-features = false, features = [ "image", "glow" ] }
