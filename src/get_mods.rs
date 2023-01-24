@@ -45,9 +45,8 @@ const OPTIFINE: [&str; 9] = [
 pub async fn run(
     mc_version: String,
     modlist: &(bool, bool, bool),
-    mut path: PathBuf,
+    base_path: PathBuf,
 ) -> Result<()> {
-    path.push("mod.jar");
     let modrinth = Ferinth::default();
     let mut mods: Vec<&str> = Vec::new();
     if modlist.0 {
@@ -87,12 +86,11 @@ pub async fn run(
                 .ok_or_else(|| anyhow!("Couldn't parse file name!"))?
                 .to_string();
             file_name = percent_decode_str(&file_name).decode_utf8()?.into_owned();
-            path.set_file_name(&file_name);
-
+            let path = base_path.join(file_name).with_extension("jar");
             let download = ureq::get(url.as_str()).call()?;
             let mut bytes = Vec::new();
             download.into_reader().read_to_end(&mut bytes)?;
-            let mut mod_file = File::create(&path)?;
+            let mut mod_file = File::create(path)?;
             mod_file.write_all(&bytes)?;
         }
     }

@@ -1,7 +1,7 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::collections::HashMap;
 use std::fs::File;
 use ureq;
@@ -11,9 +11,23 @@ const ICON: &str = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAA
 
 #[derive(Serialize, Deserialize)]
 struct LauncherProfiles {
-    profiles: HashMap<String, Value>,
+    profiles: HashMap<String, Profile>,
     settings: Value,
     version: u8,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Profile {
+    name: String,
+    last_used: String,
+    last_version_id: String,
+    created: String,
+    icon: String,
+    #[serde(rename = "type")]
+    _type: String,
+    #[serde(flatten)]
+    extra: HashMap<String, String>,
 }
 
 pub fn write_version(mc: &String, velvet: &String, z: &File) -> Result<()> {
@@ -27,42 +41,37 @@ pub fn write_profile(mc: &String, velvet: &String, x: &File) -> Result<String> {
     let mut json: LauncherProfiles = serde_json::from_reader(x)?;
 
     // This copies the "Latest Release" java arguments and version.
-    let mut args = VANILLA_ARGS;
-    let mut dir = &Value::Null;
+    let mut args = String::new();
+    let mut dir: Option<String> = None;
     for x in json.profiles.values() {
-        if x["type"] == "latest-release" {
-            if !x["javaArgs"].is_null() {
-                args = x["javaArgs"]
-                    .as_str()
-                    .ok_or_else(|| anyhow!("Failed to write javaArgs!"))?;
-            }
-            dir = &x["javaDir"];
+        if x._type == "latest-release" {
+            args = x
+                .extra
+                .get("javaArgs")
+                .map_or(VANILLA_ARGS.into(), |x| x.to_owned());
+            dir = x.extra.get("javaDir").map(|x| x.to_owned());
             break;
         }
     }
-    let time = Utc::now();
-    let mut new_profile = HashMap::from([
-        ("created", json!(&time)),
-        ("icon", json!(ICON)),
-        (
-            "javaArgs",
-            json!(format!(
-                "-Dloader.modsDir=.velvet/mods/{0} -Dloader.configDir=.velvet/config/{0} {1}",
-                &mc, &args
-            )),
-        ),
-        ("lastUsed", json!(&time)),
-        (
-            "lastVersionId",
-            json!(format!("quilt-loader-{}-{}", &velvet, &mc)),
-        ),
-        ("name", json!(format!("Velvet {}", &mc))),
-        ("type", json!("custom")),
-    ]);
-    if let Value::String(entry) = dir {
-        new_profile.insert("javaDir", json!(&entry));
+    let mut extramap = HashMap::new();
+    extramap.insert(
+        "javaArgs".to_string(),
+        format!("-Dloader.modsDir=.velvet/mods/{mc} -Dloader.configDir=.velvet/config/{mc} {args}"),
+    );
+    if let Some(x) = dir {
+        extramap.insert("javaDir".to_string(), x);
     }
+    let time = Utc::now().to_string();
+    let new_profile = Profile {
+        name: format!("Velvet {mc}"),
+        last_used: time.clone(),
+        last_version_id: format!("quilt-loader-{velvet}-{mc}"),
+        created: time,
+        icon: ICON.into(),
+        _type: "custom".into(),
+        extra: extramap,
+    };
     json.profiles
-        .insert(format!("velvet-quilt-loader-{}", &mc), json!(new_profile));
+        .insert(format!("velvet-quilt-loader-{mc}"), new_profile);
     Ok(serde_json::to_string_pretty(&json)?)
 }
