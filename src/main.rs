@@ -130,17 +130,17 @@ impl Application for Velvet {
     fn view(&self) -> Element<Message> {
         let list = match self.snapshot {
             false => pick_list(&self.version_list.0, self.version.clone(), Message::Update)
-                .width(Length::Units(200)),
+                .width(Length::Fixed(200.0)),
             true => pick_list(&self.version_list.1, self.version.clone(), Message::Update)
-                .width(Length::Units(200)),
+                .width(Length::Fixed(200.0)),
         };
 
         column![
-            vertical_space(Length::Units(10)),
+            vertical_space(Length::Fixed(10.0)),
             text("Enter Minecraft version:").size(20),
-            vertical_space(Length::Units(5)),
+            vertical_space(Length::Fixed(5.0)),
             list,
-            vertical_space(Length::Units(5)),
+            vertical_space(Length::Fixed(5.0)),
             checkbox("Show snapshots", self.snapshot, Message::Snapshot),
             vertical_space(Length::Fill),
             checkbox(
@@ -148,13 +148,13 @@ impl Application for Velvet {
                 self.vanilla,
                 Message::VButton
             ),
-            vertical_space(Length::Units(5)),
+            vertical_space(Length::Fixed(5.0)),
             checkbox(
                 "Beauty - Immersive and beautiful modlist.",
                 self.beauty,
                 Message::BButton
             ),
-            vertical_space(Length::Units(5)),
+            vertical_space(Length::Fixed(5.0)),
             checkbox(
                 "Optifine - Optifine resource pack parity.",
                 self.optifine,
@@ -162,7 +162,7 @@ impl Application for Velvet {
             ),
             vertical_space(Length::Fill),
             button(self.message.as_str()).on_press(Message::Press),
-            vertical_space(Length::Units(10)),
+            vertical_space(Length::Fixed(10.0)),
         ]
         .align_items(Alignment::Center)
         .width(Length::Fill)
