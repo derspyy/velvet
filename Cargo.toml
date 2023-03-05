@@ -11,7 +11,7 @@ chrono = { version = "0.4", default-features = false, features = ["clock"] }
 ureq = { version = "2.6", features = ["json"] }
 percent-encoding = { version = "2.2", default-features = false }
 iced = { version = "0.8", default-features = false, features = [ "image", "glow" ] }
-iced_native = "0.8"
+iced_native = "0.9"
 image = { version = "0.24", default-features = false, features = ["png"] } 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", default-features = false }
