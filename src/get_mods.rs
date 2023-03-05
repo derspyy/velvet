@@ -82,7 +82,7 @@ pub fn run(
             let url = versions[0]["url"].as_str()
                 .ok_or_else(|| anyhow!("Couldn't parse versions!"))?;
             let mut file_name = url
-                .split("/")
+                .split('/')
                 .last()
                 .ok_or_else(|| anyhow!("Couldn't parse file name!"))?
                 .to_string();
