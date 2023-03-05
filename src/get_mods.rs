@@ -1,7 +1,7 @@
 use std::{fs::File, io::Write, path::PathBuf};
 
 use anyhow::{anyhow, Result};
-use ferinth::Ferinth;
+use serde_json::Value;
 use percent_encoding::percent_decode_str;
 
 const VANILLA: [&str; 8] = [
@@ -41,13 +41,16 @@ const OPTIFINE: [&str; 9] = [
     "qvIfYCYJ", // qsl
 ];
 
-#[tokio::main]
-pub async fn run(
+const MODRINTH_SERVER: &str = "https://api.modrinth.com/v2/project";
+
+pub fn run(
     mc_version: String,
     modlist: &(bool, bool, bool),
     base_path: PathBuf,
 ) -> Result<()> {
-    let modrinth = Ferinth::default();
+    let agent = ureq::AgentBuilder::new()
+        .user_agent(concat!( env!("CARGO_PKG_NAME"), "+", env!("CARGO_PKG_VERSION") ))
+        .build();
     let mut mods: Vec<&str> = Vec::new();
     if modlist.0 {
         for x in VANILLA {
@@ -66,28 +69,26 @@ pub async fn run(
     }
     mods.sort();
     mods.dedup();
-
     for x in mods {
-        let versions = modrinth
-            .list_versions_filtered(
-                x,
-                Some(&["quilt", "fabric"]),
-                Some(&[mc_version.as_str()]),
-                None,
-            )
-            .await?;
+        let modrinth_url = format!("{}/{}/version?loaders=[\"fabric\", \"quilt\"]?game_versions=[{:?}]", MODRINTH_SERVER, x, mc_version);
+        let response: Value = agent
+            .get(&modrinth_url)
+            .call()?
+            .into_json()?;
+        let versions = response[0]["files"].as_array()
+            .ok_or_else(|| anyhow!("Couldn't parse versions!"))?;
 
         if !versions.is_empty() {
-            let url = versions[0].files[0].url.to_owned();
+            let url = versions[0]["url"].as_str()
+                .ok_or_else(|| anyhow!("Couldn't parse versions!"))?;
             let mut file_name = url
-                .path_segments()
-                .and_then(|segments| segments.last())
-                .and_then(|name| if name.is_empty() { None } else { Some(name) })
+                .split("/")
+                .last()
                 .ok_or_else(|| anyhow!("Couldn't parse file name!"))?
                 .to_string();
             file_name = percent_decode_str(&file_name).decode_utf8()?.into_owned();
             let path = base_path.join(file_name).with_extension("jar");
-            let download = ureq::get(url.as_str()).call()?;
+            let download = agent.get(url).call()?;
             let mut bytes = Vec::new();
             download.into_reader().read_to_end(&mut bytes)?;
             let mut mod_file = File::create(path)?;
