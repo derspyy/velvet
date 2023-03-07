@@ -88,8 +88,7 @@ pub fn run(
 }
 
 fn download_mod(x: &str, agent: ureq::Agent, mc_version: String, base_path: PathBuf) -> Result<(), anyhow::Error> {
-    println!("Installing {}", x);
-    let modrinth_url = format!("{}/{}/version?loaders=[\"fabric\", \"quilt\"]?game_versions=[{:?}]", MODRINTH_SERVER, x, mc_version);
+    let modrinth_url = format!("{}/{}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{:?}]", MODRINTH_SERVER, x, mc_version);
     let response: Value = agent
             .get(&modrinth_url)
             .call()?
@@ -113,6 +112,5 @@ fn download_mod(x: &str, agent: ureq::Agent, mc_version: String, base_path: Path
         let mut mod_file = File::create(path)?;
         mod_file.write_all(&bytes)?;
     }
-    println!("Returning {}", x);
     Ok(())
 }
