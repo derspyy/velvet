@@ -1,17 +1,19 @@
 use crate::{get_minecraft_dir, write_json};
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
-use std::{fs, io};
+use std::fs;
+use rfd::FileDialog;
 
 #[allow(unused_must_use)]
 pub fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf> {
     let mut mc_path = get_minecraft_dir::dir()?;
     while !mc_path.is_dir() {
-        let mut temp_path = String::new();
-        io::stdin().read_line(&mut temp_path)?;
-        mc_path = PathBuf::from(&temp_path);
+        mc_path = FileDialog::new()
+            .set_title("Select .minecraft folder:")
+            .pick_folder()
+            .ok_or_else(|| anyhow!("Select a folder!"))?;
     }
 
     let velvet_path = PathBuf::from(&mc_path).join(".velvet");
