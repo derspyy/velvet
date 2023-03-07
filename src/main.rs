@@ -73,7 +73,7 @@ pub enum Message {
     BButton(bool),
     OButton(bool),
     Press,
-    Done(Result<(), String>),
+    Done(Result<Vec<String>, String>),
 }
 
 impl Application for Velvet {
@@ -120,7 +120,12 @@ impl Application for Velvet {
                 None => self.message = String::from("No version selected"),
             },
             Message::Done(value) => match value {
-                Ok(_) => self.message = String::from("Finished!"),
+                Ok(x) => {
+                    match x.is_empty() {
+                        true => self.message = String::from("Finished!"),
+                        false => self.message = format!("Finished, although the following mods {:?} were unavailable.", x)
+                    }
+                },
                 Err(x) => self.message = x,
             },
         }
@@ -186,7 +191,7 @@ struct Response {
     version: String,
 }
 
-async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<(), String> {
+async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<Vec<String>, String> {
     let response: Vec<Response> = ureq::get("https://meta.quiltmc.org/v3/versions/loader")
         .call()
         .map_err(|e| format!("{e}"))?
@@ -202,6 +207,6 @@ async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<(), Str
     }
 
     let path_mods = install_velvet::run(&mc_version, &quilt_version).map_err(|e| format!("{e}"))?;
-    get_mods::run(mc_version, &modlists, path_mods).map_err(|e| format!("{e}"))?;
-    Ok(())
+    let errors = get_mods::run(mc_version, &modlists, path_mods).map_err(|e| format!("{e}"))?;
+    Ok(errors)
 }

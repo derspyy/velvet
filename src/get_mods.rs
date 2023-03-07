@@ -48,7 +48,7 @@ pub fn run(
     mc_version: String,
     modlist: &(bool, bool, bool),
     base_path: PathBuf,
-) -> Result<()> {
+) -> Result<Vec<String>> {
     let agent = ureq::AgentBuilder::new()
         .user_agent(concat!( env!("CARGO_PKG_NAME"), "+", env!("CARGO_PKG_VERSION") ))
         .build();
@@ -80,21 +80,43 @@ pub fn run(
         }));
     }
 
+    let mut error_vec = Vec::new();
+
     for thread in thread_vec {
-        thread.join().unwrap()?
+        if let Status::NotFound(x) = thread.join().unwrap()? {
+            error_vec.push(x);
+        }
     }
 
-    Ok(())
+    Ok(error_vec)
 }
 
-fn download_mod(x: &str, agent: ureq::Agent, mc_version: String, base_path: PathBuf) -> Result<(), anyhow::Error> {
-    let modrinth_url = format!("{}/{}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{:?}]", MODRINTH_SERVER, x, mc_version);
-    let response: Value = agent
+enum Status {
+    Found,
+    NotFound(String),
+}
+
+fn download_mod(x: &str, agent: ureq::Agent, mc_version: String, base_path: PathBuf) -> Result<Status, anyhow::Error> {
+    let mut modrinth_url = format!("{}/{}", MODRINTH_SERVER, x);
+
+    let name_response: Value = agent
             .get(&modrinth_url)
             .call()?
             .into_json()?;
-    let versions = response[0]["files"].as_array()
-            .ok_or_else(|| anyhow!("Couldn't parse versions!"))?;
+    let name = name_response["slug"].as_str()
+            .ok_or_else(|| anyhow!("Couldn't get project name!"))?
+            .to_string();
+
+    modrinth_url = format!("{}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{:?}]", modrinth_url, mc_version);
+
+    let version_response: Value = agent
+            .get(&modrinth_url)
+            .call()?
+            .into_json()?;
+    let versions = match version_response[0]["files"].as_array() {
+        Some(x) => x,
+        None => return Ok( Status::NotFound(name) ),
+    };
 
     if !versions.is_empty() {
         let url = versions[0]["url"].as_str()
@@ -112,5 +134,5 @@ fn download_mod(x: &str, agent: ureq::Agent, mc_version: String, base_path: Path
         let mut mod_file = File::create(path)?;
         mod_file.write_all(&bytes)?;
     }
-    Ok(())
+    Ok(Status::Found)
 }
