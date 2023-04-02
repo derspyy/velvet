@@ -5,14 +5,13 @@ use serde_json::Value;
 use percent_encoding::percent_decode_str;
 
 
-const VANILLA: [&str; 8] = [
+const VANILLA: [&str; 7] = [
     "AANobbMI", // sodium
     "gvQqBUqZ", // lithium
     "hEOCdOgW", // phosphor
     "hvFnDODi", // lazydfu
     "uXXizFIs", // ferrite-core
     "fQEb0iXm", // krypton
-    "FWumhS4T", // smoothboot-fabric
     "5ZwdcRci", // immediatelyfast
 ];
 
