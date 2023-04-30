@@ -1,6 +1,6 @@
 # ![icon](src/assets/icon.png) velvet for minecraft
 
-^ cute icon by my friend [aria](https://twitter.com/sepiaclockworks).
+^ cute icon by my friend [aria](https://twitter.com/flareslammer).
 
 |download ⬇️|[windows](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-windows-latest.zip)|[linux](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-ubuntu-latest.zip)|[macos](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-macos-latest.zip)
 |-|-|-|-|
