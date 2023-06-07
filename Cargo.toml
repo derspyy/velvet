@@ -9,7 +9,7 @@ edition = "2021"
 anyhow = "1"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 ureq = { version = "2.6", features = ["json"] }
-percent-encoding = { version = "2.2", default-features = false }
+percent-encoding = { version = "2.3", default-features = false }
 iced = { version = "0.9", default-features = false, features = [ "image", "glow" ] }
 iced_native = "0.10"
 image = { version = "0.24", default-features = false, features = ["png"] }
