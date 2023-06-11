@@ -7,10 +7,11 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
+async-std = { version = "1.12.0", features = ["tokio1"]}
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
-ureq = { version = "2.6", features = ["json"] }
+reqwest = { version = "0.11", features = ["json"] }
 percent-encoding = { version = "2.3", default-features = false }
-iced = { version = "0.9", default-features = false, features = [ "image", "glow" ] }
+iced = { version = "0.9", default-features = false, features = [ "image", "glow", "async-std" ] }
 iced_native = "0.10"
 image = { version = "0.24", default-features = false, features = ["png"] }
 serde = { version = "1.0", features = ["derive"] }
@@ -21,3 +22,4 @@ rfd = { version = "0.11", default-features = false, features = ["xdg-portal"] }
 [profile.release]
 lto = true
 codegen-units = 1
+strip = true

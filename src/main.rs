@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 use anyhow::Result;
+use iced::futures::TryFutureExt;
 use serde::Deserialize;
 
 mod get_minecraft_dir;
@@ -21,25 +22,7 @@ struct Versions {
 }
 
 pub fn main() -> iced::Result {
-    let mut vec1 = Vec::new();
-    let mut vec2 = Vec::new();
-
-    let response: Vec<Versions> = ureq::get("https://meta.quiltmc.org/v3/versions/game")
-        .call()
-        .expect("Couldn't get versions.")
-        .into_json()
-        .unwrap();
-
-    for value in response {
-        if value.stable {
-            vec1.push(value.version.clone())
-        }
-        vec2.push(value.version)
-    }
-    let vec = (vec1, vec2);
-
     Velvet::run(Settings {
-        flags: vec,
         window: window::Settings {
             size: (500, 200),
             min_size: Some((500, 250)),
@@ -56,7 +39,7 @@ pub fn main() -> iced::Result {
 }
 
 struct Velvet {
-    version_list: (Vec<String>, Vec<String>),
+    version_list: Vec<String>,
     snapshot: bool,
     version: Option<String>,
     vanilla: bool,
@@ -67,25 +50,26 @@ struct Velvet {
 
 #[derive(Debug, Clone)]
 pub enum Message {
+    Populate(Vec<String>),
     Update(String),
     Snapshot(bool),
     VButton(bool),
     BButton(bool),
     OButton(bool),
     Press,
-    Done(Result<Vec<String>, String>),
+    Done(Result<String, String>),
 }
 
 impl Application for Velvet {
     type Executor = executor::Default;
     type Message = Message;
     type Theme = Theme;
-    type Flags = (Vec<String>, Vec<String>);
+    type Flags = ();
 
-    fn new(flags: (Vec<String>, Vec<String>)) -> (Self, Command<Message>) {
+    fn new(_flags: ()) -> (Self, Command<Message>) {
         (
             Velvet {
-                version_list: flags,
+                version_list: Vec::new(),
                 snapshot: false,
                 version: None,
                 vanilla: true,
@@ -93,7 +77,7 @@ impl Application for Velvet {
                 optifine: false,
                 message: String::from("Install"),
             },
-            Command::none(),
+            Command::perform(populate(false), Message::Populate),
         )
     }
 
@@ -106,8 +90,12 @@ impl Application for Velvet {
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
+            Message::Populate(value) => self.version_list = value,
             Message::Update(value) => self.version = Some(value),
-            Message::Snapshot(value) => self.snapshot = value,
+            Message::Snapshot(value) => {
+                self.snapshot = value;
+                return Command::perform(populate(value), Message::Populate);
+            }
             Message::VButton(value) => self.vanilla = value,
             Message::BButton(value) => self.beauty = value,
             Message::OButton(value) => self.optifine = value,
@@ -115,15 +103,19 @@ impl Application for Velvet {
                 Some(value) => {
                     self.message = String::from("Installing...");
                     let values = (self.vanilla, self.beauty, self.optifine);
-                    return Command::perform(run(value.clone(), values), Message::Done);
+                    return Command::perform(
+                        run(value.clone(), values).map_err(|e| format!("{e}")),
+                        Message::Done,
+                    );
                 }
                 None => self.message = String::from("No version selected"),
             },
             Message::Done(value) => match value {
-                Ok(x) => {
-                    match x.is_empty() {
-                        true => self.message = String::from("Finished!"),
-                        false => self.message = format!("Finished, although the following mods {:?} were unavailable.", x)
+                Ok(x) => match x.is_empty() {
+                    true => self.message = String::from("Finished!"),
+                    false => {
+                        self.message =
+                            format!("Finished, although the following mods {x} were unavailable.")
                     }
                 },
                 Err(x) => self.message = x,
@@ -133,18 +125,12 @@ impl Application for Velvet {
     }
 
     fn view(&self) -> Element<Message> {
-        let list = match self.snapshot {
-            false => pick_list(&self.version_list.0, self.version.clone(), Message::Update)
-                .width(Length::Fixed(200.0)),
-            true => pick_list(&self.version_list.1, self.version.clone(), Message::Update)
-                .width(Length::Fixed(200.0)),
-        };
-
         column![
             vertical_space(Length::Fixed(10.0)),
             text("Enter Minecraft version:").size(20),
             vertical_space(Length::Fixed(5.0)),
-            list,
+            pick_list(&self.version_list, self.version.clone(), Message::Update)
+                .width(Length::Fixed(200.0)),
             vertical_space(Length::Fixed(5.0)),
             checkbox("Show snapshots", self.snapshot, Message::Snapshot),
             vertical_space(Length::Fill),
@@ -191,12 +177,11 @@ struct Response {
     version: String,
 }
 
-async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<Vec<String>, String> {
-    let response: Vec<Response> = ureq::get("https://meta.quiltmc.org/v3/versions/loader")
-        .call()
-        .map_err(|e| format!("{e}"))?
-        .into_json()
-        .map_err(|e| format!("{e}"))?;
+async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<String> {
+    let response: Vec<Response> = reqwest::get("https://meta.quiltmc.org/v3/versions/loader")
+        .await?
+        .json()
+        .await?;
 
     let mut quilt_version = String::new();
     for x in response {
@@ -206,7 +191,24 @@ async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<Vec<Str
         }
     }
 
-    let path_mods = install_velvet::run(&mc_version, &quilt_version).map_err(|e| format!("{e}"))?;
-    let errors = get_mods::run(mc_version, &modlists, path_mods).map_err(|e| format!("{e}"))?;
+    let path_mods = install_velvet::run(&mc_version, &quilt_version).await?;
+    let errors = get_mods::run(mc_version, &modlists, path_mods).await?;
     Ok(errors)
+}
+
+async fn populate(x: bool) -> Vec<String> {
+    let mut versions_list = Vec::new();
+    let response: Vec<Versions> = reqwest::get("https://meta.quiltmc.org/v3/versions/game")
+        .await
+        .expect("Couldn't get versions.")
+        .json()
+        .await
+        .unwrap();
+
+    for value in response {
+        if x || value.stable {
+            versions_list.push(value.version)
+        }
+    }
+    versions_list
 }

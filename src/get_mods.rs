@@ -1,9 +1,10 @@
-use std::{fs::File, io::Write, path::PathBuf, thread};
-
 use anyhow::{anyhow, Result};
-use serde_json::Value;
+use async_std::prelude::*;
+use async_std::{fs::File, path::PathBuf};
+use iced::futures::future::join_all;
 use percent_encoding::percent_decode_str;
-
+use reqwest::{Client, ClientBuilder};
+use serde_json::Value;
 
 const VANILLA: [&str; 7] = [
     "AANobbMI", // sodium
@@ -43,14 +44,18 @@ const OPTIFINE: [&str; 9] = [
 
 const MODRINTH_SERVER: &str = "https://api.modrinth.com/v2/project";
 
-pub fn run(
+pub async fn run(
     mc_version: String,
     modlist: &(bool, bool, bool),
     base_path: PathBuf,
-) -> Result<Vec<String>> {
-    let agent = ureq::AgentBuilder::new()
-        .user_agent(concat!( env!("CARGO_PKG_NAME"), "+", env!("CARGO_PKG_VERSION") ))
-        .build();
+) -> Result<String> {
+    let client = ClientBuilder::new()
+        .user_agent(concat!(
+            env!("CARGO_PKG_NAME"),
+            "+",
+            env!("CARGO_PKG_VERSION")
+        ))
+        .build()?;
     let mut mods: Vec<&str> = Vec::new();
     if modlist.0 {
         for x in VANILLA {
@@ -69,25 +74,36 @@ pub fn run(
     }
     mods.sort();
     mods.dedup();
-    let mut thread_vec = Vec::new();
-    for x in mods {
-        let agent = agent.clone();
-        let mc_version = mc_version.clone();
-        let base_path = base_path.clone();
-        thread_vec.push(thread::spawn(move || {
-            download_mod(x, agent, mc_version, base_path)
-        }));
+
+    let mut tasks = Vec::new();
+    for task in mods {
+        tasks.push(download_mod(
+            task,
+            client.clone(),
+            mc_version.clone(),
+            base_path.clone(),
+        ));
     }
 
-    let mut error_vec = Vec::new();
+    let mut mods_not_found = String::new();
 
-    for thread in thread_vec {
-        if let Status::NotFound(x) = thread.join().unwrap()? {
-            error_vec.push(x);
+    let results = join_all(tasks).await;
+    for result in results {
+        match result {
+            Ok(Status::Found) => {}
+            Ok(Status::NotFound(name)) => {
+                if mods_not_found.is_empty() {
+                    mods_not_found.push_str(&name);
+                } else {
+                    mods_not_found.push(',');
+                    mods_not_found.push(' ');
+                    mods_not_found.push_str(&name);
+                }
+            }
+            Err(e) => return Err(e),
         }
     }
-
-    Ok(error_vec)
+    Ok(mods_not_found)
 }
 
 enum Status {
@@ -95,43 +111,45 @@ enum Status {
     NotFound(String),
 }
 
-fn download_mod(x: &str, agent: ureq::Agent, mc_version: String, base_path: PathBuf) -> Result<Status, anyhow::Error> {
+async fn download_mod(
+    x: &str,
+    client: Client,
+    mc_version: String,
+    base_path: PathBuf,
+) -> Result<Status, anyhow::Error> {
     let mut modrinth_url = format!("{}/{}", MODRINTH_SERVER, x);
 
-    let name_response: Value = agent
-            .get(&modrinth_url)
-            .call()?
-            .into_json()?;
-    let name = name_response["slug"].as_str()
-            .ok_or_else(|| anyhow!("Couldn't get project name!"))?
-            .to_string();
+    let name_response: Value = client.get(&modrinth_url).send().await?.json().await?;
+    let name = name_response["title"]
+        .as_str()
+        .ok_or_else(|| anyhow!("Couldn't get project name!"))?
+        .to_owned();
 
-    modrinth_url = format!("{}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{:?}]", modrinth_url, mc_version);
+    modrinth_url = format!(
+        "{}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{:?}]",
+        modrinth_url, mc_version
+    );
 
-    let version_response: Value = agent
-            .get(&modrinth_url)
-            .call()?
-            .into_json()?;
+    let version_response: Value = client.get(&modrinth_url).send().await?.json().await?;
     let versions = match version_response[0]["files"].as_array() {
         Some(x) => x,
-        None => return Ok( Status::NotFound(name) ),
+        None => return Ok(Status::NotFound(name)),
     };
 
     if !versions.is_empty() {
-        let url = versions[0]["url"].as_str()
-                .ok_or_else(|| anyhow!("Couldn't parse versions!"))?;
+        let url = versions[0]["url"]
+            .as_str()
+            .ok_or_else(|| anyhow!("Couldn't parse versions!"))?;
         let mut file_name = url
-                .split('/')
-                .last()
-                .ok_or_else(|| anyhow!("Couldn't parse file name!"))?
-                .to_string();
+            .split('/')
+            .last()
+            .ok_or_else(|| anyhow!("Couldn't parse file name!"))?
+            .to_string();
         file_name = percent_decode_str(&file_name).decode_utf8()?.into_owned();
         let path = base_path.join(file_name).with_extension("jar");
-        let download = agent.get(url).call()?;
-        let mut bytes = Vec::new();
-        download.into_reader().read_to_end(&mut bytes)?;
-        let mut mod_file = File::create(path)?;
-        mod_file.write_all(&bytes)?;
+        let download = client.get(url).send().await?.bytes().await?;
+        let mut mod_file = File::create(path).await?;
+        mod_file.write(&download).await?;
     }
     Ok(Status::Found)
 }
