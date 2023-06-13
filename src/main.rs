@@ -181,23 +181,26 @@ impl Application for Velvet {
             vertical_space(Length::Fixed(5.0)),
             checkbox("Show snapshots", self.snapshot, Message::Snapshot),
             vertical_space(Length::Fill),
-            checkbox(
-                "Vanilla - Performance enhancing modlist.",
-                self.vanilla,
-                Message::VButton
-            ),
-            vertical_space(Length::Fixed(5.0)),
-            checkbox(
-                "Beauty - Immersive and beautiful modlist.",
-                self.beauty,
-                Message::BButton
-            ),
-            vertical_space(Length::Fixed(5.0)),
-            checkbox(
-                "Optifine - Optifine resource pack parity.",
-                self.optifine,
-                Message::OButton
-            ),
+            column![
+                checkbox(
+                    "Vanilla - Performance enhancing modlist.",
+                    self.vanilla,
+                    Message::VButton
+                ),
+                vertical_space(Length::Fixed(5.0)),
+                checkbox(
+                    "Beauty - Immersive and beautiful modlist.",
+                    self.beauty,
+                    Message::BButton
+                ),
+                vertical_space(Length::Fixed(5.0)),
+                checkbox(
+                    "Optifine - Optifine resource pack parity.",
+                    self.optifine,
+                    Message::OButton
+                )
+            ]
+            .align_items(Alignment::Start),
             vertical_space(Length::Fill),
             extra_message,
             vertical_space(Length::Fill),
