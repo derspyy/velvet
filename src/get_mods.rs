@@ -48,7 +48,7 @@ pub async fn run(
     mc_version: String,
     modlist: &(bool, bool, bool),
     base_path: PathBuf,
-) -> Result<String> {
+) -> Result<Vec<String>> {
     let client = ClientBuilder::new()
         .user_agent(concat!(
             env!("CARGO_PKG_NAME"),
@@ -85,21 +85,13 @@ pub async fn run(
         ));
     }
 
-    let mut mods_not_found = String::new();
+    let mut mods_not_found = Vec::new();
 
     let results = join_all(tasks).await;
     for result in results {
         match result {
             Ok(Status::Found) => {}
-            Ok(Status::NotFound(name)) => {
-                if mods_not_found.is_empty() {
-                    mods_not_found.push_str(&name);
-                } else {
-                    mods_not_found.push(',');
-                    mods_not_found.push(' ');
-                    mods_not_found.push_str(&name);
-                }
-            }
+            Ok(Status::NotFound(name)) => mods_not_found.push(name),
             Err(e) => return Err(e),
         }
     }
@@ -120,7 +112,7 @@ async fn download_mod(
     let mut modrinth_url = format!("{}/{}", MODRINTH_SERVER, x);
 
     let name_response: Value = client.get(&modrinth_url).send().await?.json().await?;
-    let name = name_response["title"]
+    let name = name_response["slug"]
         .as_str()
         .ok_or_else(|| anyhow!("Couldn't get project name!"))?
         .to_owned();
