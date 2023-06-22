@@ -4,16 +4,19 @@ use async_std::fs;
 use async_std::fs::File;
 use async_std::path::PathBuf;
 use async_std::prelude::*;
-use rfd::FileDialog;
+use rfd::AsyncFileDialog;
 
-#[allow(unused_must_use)]
 pub async fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf> {
-    let mut mc_path = get_minecraft_dir::dir()?;
-    while !mc_path.is_dir() {
-        mc_path = FileDialog::new()
-            .set_title("Select .minecraft folder:")
-            .pick_folder()
-            .ok_or_else(|| anyhow!("Select a folder!"))?;
+    let mut mc_path: PathBuf = get_minecraft_dir::dir()?;
+    while !mc_path.is_dir().await {
+        mc_path = std::path::PathBuf::from(
+            AsyncFileDialog::new()
+                .set_title("Select .minecraft folder:")
+                .pick_folder()
+                .await
+                .ok_or_else(|| anyhow!("Select a folder!"))?,
+        )
+        .into();
     }
 
     let velvet_path = PathBuf::from(&mc_path).join(".velvet");
