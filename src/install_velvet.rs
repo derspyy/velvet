@@ -24,19 +24,23 @@ pub async fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf>
     let path_versions = PathBuf::from(&velvet_path)
         .join("versions")
         .join(mc_version);
-    fs::create_dir_all(path_versions).await;
+    fs::create_dir_all(path_versions).await?;
 
     let path_mods = PathBuf::from(&velvet_path).join("mods").join(mc_version);
-    fs::remove_dir_all(&path_mods).await;
-    fs::create_dir_all(&path_mods).await;
+
+    if path_mods.exists().await {
+        fs::remove_dir_all(&path_mods).await?;
+    }
+
+    fs::create_dir_all(&path_mods).await?;
 
     let version_folder_name = format!("quilt-loader-{}-{}", &quilt_version, &mc_version);
     let mut path_version = PathBuf::from(&mc_path)
         .join("versions")
         .join(&version_folder_name);
-    fs::create_dir_all(&path_version).await;
+    fs::create_dir_all(&path_version).await?;
     path_version.push(format!("{}.jar", version_folder_name));
-    fs::File::create(&path_version).await; // Dummy jar required by the launcher
+    fs::File::create(&path_version).await?; // Dummy jar required by the launcher
 
     path_version.set_extension("json");
     let json_file = File::create(&path_version).await?;
