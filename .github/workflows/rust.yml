@@ -18,10 +18,13 @@ jobs:
         include:
           - os: ubuntu-latest
             path: "target/release/velvet-minecraft"
+            gtk: true
           - os: macos-latest
             path: "target/release/velvet-minecraft"
+            gtk: false
           - os: windows-latest
             path: "target/release/velvet-minecraft.exe"
+            gtk: false
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
@@ -35,6 +38,9 @@ jobs:
           target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - uses: rui314/setup-mold@v1
+    - name: Install GTK
+      if: ${{ matrix.gtk }}
+      run: sudo apt install libgtk-3-dev
     - name: Build
       run: cargo build --release --verbose
     - name: Upload a Build Artifact
