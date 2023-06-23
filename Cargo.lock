@@ -3544,7 +3544,6 @@ dependencies = [
  "iced",
  "iced_native",
  "image",
- "percent-encoding",
  "reqwest",
  "rfd",
  "serde",

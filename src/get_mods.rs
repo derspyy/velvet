@@ -1,10 +1,11 @@
 use anyhow::{anyhow, Result};
-use async_std::prelude::*;
+use async_std::fs::remove_file;
 use async_std::{fs::File, path::PathBuf};
+use async_std::{prelude::*, task};
 use iced::futures::future::join_all;
-use percent_encoding::percent_decode_str;
 use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
+use std::collections::HashMap;
 
 const VANILLA: [&str; 7] = [
     "AANobbMI", // sodium
@@ -44,10 +45,15 @@ const OPTIFINE: [&str; 9] = [
 
 const MODRINTH_SERVER: &str = "https://api.modrinth.com/v2/project";
 
+enum Status {
+    Found(String, String, String),
+    NotFound(String),
+}
+
 pub async fn run(
     mc_version: String,
     modlist: &(bool, bool, bool),
-    base_path: PathBuf,
+    (path_mods, version_file_path): (PathBuf, PathBuf),
 ) -> Result<Vec<String>> {
     let client = ClientBuilder::new()
         .user_agent(concat!(
@@ -56,61 +62,93 @@ pub async fn run(
             env!("CARGO_PKG_VERSION")
         ))
         .build()?;
-    let mut mods: Vec<&str> = Vec::new();
+
+    let mut version_file = File::open(&version_file_path).await?;
+
+    let mut bytes = Vec::new();
+    version_file.read_to_end(&mut bytes).await?;
+    let existing_mods: HashMap<String, String> = match serde_json::from_slice(&bytes) {
+        Ok(x) => x,
+        Err(_) => HashMap::new(),
+    };
+
+    let mut mods = Vec::new();
+
     if modlist.0 {
-        for x in VANILLA {
-            mods.push(x)
-        }
+        VANILLA.into_iter().for_each(|x| mods.push(x));
     }
     if modlist.1 {
-        for x in VISUAL {
-            mods.push(x)
-        }
+        VISUAL.into_iter().for_each(|x| mods.push(x));
     }
     if modlist.2 {
-        for x in OPTIFINE {
-            mods.push(x)
-        }
+        OPTIFINE.into_iter().for_each(|x| mods.push(x));
     }
+
     mods.sort();
     mods.dedup();
 
-    let mut tasks = Vec::new();
-    for task in mods {
-        tasks.push(download_mod(
-            task,
-            client.clone(),
-            mc_version.clone(),
-            base_path.clone(),
-        ));
+    let mut get_versions = Vec::new();
+    let mut download_mods = Vec::new();
+
+    for x in mods {
+        let task = task::spawn(check_latest(x, client.clone(), mc_version.clone()));
+        get_versions.push(task);
     }
 
+    let mut new_mods: HashMap<String, String> = HashMap::new();
     let mut mods_not_found = Vec::new();
 
-    let results = join_all(tasks).await;
-    for result in results {
+    for result in join_all(get_versions).await {
         match result {
-            Ok(Status::Found) => {}
-            Ok(Status::NotFound(name)) => mods_not_found.push(name),
-            Err(e) => return Err(e),
+            Err(x) => return Err(x),
+            Ok(Status::NotFound(x)) => mods_not_found.push(x),
+            Ok(Status::Found(name, url, hash)) => {
+                match existing_mods.get(&name) {
+                    Some(x) if x == &hash => {
+                        println!("Already found \x1b[35m{}\x1b[39m.", name)
+                    }
+                    _ => download_mods.push(task::spawn(download_mod(
+                        url,
+                        name.clone(),
+                        path_mods.clone(),
+                        client.clone(),
+                    ))),
+                }
+                new_mods.insert(name, hash);
+            }
         }
     }
+
+    for (name, hash) in existing_mods {
+        if new_mods.get(&name) != Some(&hash) {
+            println!("Removing \x1b[35m{}\x1b[39m.", name);
+            remove_file(path_mods.join(name).with_extension("jar")).await?
+        }
+    }
+
+    join_all(download_mods).await;
+
+    let mut version_file = File::create(version_file_path).await?;
+
+    version_file
+        .write_all(&serde_json::to_vec_pretty(&new_mods)?)
+        .await?;
+
     Ok(mods_not_found)
 }
 
-enum Status {
-    Found,
-    NotFound(String),
+async fn download_mod(url: String, file_name: String, path: PathBuf, client: Client) -> Result<()> {
+    println!("Downloading \x1b[35m{}\x1b[39m.", file_name);
+    let path = path.join(&file_name).with_extension("jar");
+    let download = client.get(url).send().await?.bytes().await?;
+    let mut mod_file = File::create(path).await?;
+    mod_file.write(&download).await?;
+    println!("Finished downloading \x1b[35m{}\x1b[39m.", file_name);
+    Ok(())
 }
 
-async fn download_mod(
-    x: &str,
-    client: Client,
-    mc_version: String,
-    base_path: PathBuf,
-) -> Result<Status, anyhow::Error> {
+async fn check_latest(x: &str, client: Client, mc_version: String) -> Result<Status> {
     let mut modrinth_url = format!("{}/{}", MODRINTH_SERVER, x);
-
     let name_response: Value = client.get(&modrinth_url).send().await?.json().await?;
     let name = name_response["slug"]
         .as_str()
@@ -127,21 +165,17 @@ async fn download_mod(
         Some(x) => x,
         None => return Ok(Status::NotFound(name)),
     };
-
     if !versions.is_empty() {
         let url = versions[0]["url"]
             .as_str()
-            .ok_or_else(|| anyhow!("Couldn't parse versions!"))?;
-        let mut file_name = url
-            .split('/')
-            .last()
-            .ok_or_else(|| anyhow!("Couldn't parse file name!"))?
-            .to_string();
-        file_name = percent_decode_str(&file_name).decode_utf8()?.into_owned();
-        let path = base_path.join(file_name).with_extension("jar");
-        let download = client.get(url).send().await?.bytes().await?;
-        let mut mod_file = File::create(path).await?;
-        mod_file.write(&download).await?;
+            .ok_or_else(|| anyhow!("Couldn't parse versions!"))?
+            .into();
+        let hash = versions[0]["hashes"]["sha1"]
+            .as_str()
+            .ok_or_else(|| anyhow!("Couldn't parse versions!"))?
+            .into();
+        Ok(Status::Found(name, url, hash))
+    } else {
+        Ok(Status::NotFound(name))
     }
-    Ok(Status::Found)
 }

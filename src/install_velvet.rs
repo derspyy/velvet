@@ -6,7 +6,7 @@ use async_std::path::PathBuf;
 use async_std::prelude::*;
 use rfd::AsyncFileDialog;
 
-pub async fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf> {
+pub async fn run(mc_version: &String, quilt_version: &String) -> Result<(PathBuf, PathBuf)> {
     let mut mc_path: PathBuf = get_minecraft_dir::dir()?;
     while !mc_path.is_dir().await {
         mc_path = std::path::PathBuf::from(
@@ -21,16 +21,12 @@ pub async fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf>
 
     let velvet_path = PathBuf::from(&mc_path).join(".velvet");
 
-    let path_versions = PathBuf::from(&velvet_path)
-        .join("versions")
-        .join(mc_version);
-    fs::create_dir_all(path_versions).await?;
-
-    let path_mods = PathBuf::from(&velvet_path).join("mods").join(mc_version);
-
-    if path_mods.exists().await {
-        fs::remove_dir_all(&path_mods).await?;
+    let mut path_versions: PathBuf = PathBuf::from(&velvet_path).join("versions");
+    path_versions.push(format!("{}.json", mc_version));
+    if !path_versions.exists().await {
+        File::create(&path_versions).await?;
     }
+    let path_mods = PathBuf::from(&velvet_path).join("mods").join(mc_version);
 
     fs::create_dir_all(&path_mods).await?;
 
@@ -40,7 +36,7 @@ pub async fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf>
         .join(&version_folder_name);
     fs::create_dir_all(&path_version).await?;
     path_version.push(format!("{}.jar", version_folder_name));
-    fs::File::create(&path_version).await?; // Dummy jar required by the launcher
+    fs::File::create(&path_version).await?; // dummy jar required by the launcher.
 
     path_version.set_extension("json");
     let json_file = File::create(&path_version).await?;
@@ -55,5 +51,5 @@ pub async fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf>
     launcher_file = File::create(&mc_path).await?;
     launcher_file.write_all(profile.as_bytes()).await?;
 
-    Ok(path_mods)
+    Ok((path_mods, path_versions))
 }
