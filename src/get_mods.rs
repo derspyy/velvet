@@ -17,8 +17,8 @@ const VANILLA: [&str; 7] = [
     "5ZwdcRci", // immediatelyfast
 ];
 
-const VISUAL: [&str; 10] = [
-    // effective
+const VISUAL: [&str; 11] = [
+    "pcPXJeZi", // effective
     "yBW8D80W", // lambdynamiclights
     "MPCX6s5C", // not-enough-animations
     "WhbRG4iK", // fallingleaves
@@ -35,7 +35,7 @@ const OPTIFINE: [&str; 9] = [
     "3IuO68q1", // puzzle
     "PRN43VSY", // animatica
     "Orvt0mRa", // indium
-    "GNxdLCoP", // cull-leaves
+    "iG6ZHsUV", // cull-less-leaves
     "1IjD5062", // continuity
     "2Uev7LdA", // lambdabettergrass
     "otVJckYQ", // cit-resewn
