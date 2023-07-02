@@ -5,7 +5,7 @@ use async_std::{prelude::*, task};
 use iced::futures::future::join_all;
 use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 const VANILLA: [&str; 7] = [
     "AANobbMI", // sodium
@@ -72,20 +72,24 @@ pub async fn run(
         Err(_) => HashMap::new(),
     };
 
-    let mut mods = Vec::new();
+    let mut mods = HashSet::new();
 
     if modlist.0 {
-        VANILLA.into_iter().for_each(|x| mods.push(x));
+        for x in VANILLA {
+            mods.insert(x);
+        }
     }
     if modlist.1 {
-        VISUAL.into_iter().for_each(|x| mods.push(x));
+        for x in VISUAL {
+            mods.insert(x);
+        }
     }
     if modlist.2 {
-        OPTIFINE.into_iter().for_each(|x| mods.push(x));
+        for x in OPTIFINE {
+            mods.insert(x);
+        }
     }
 
-    mods.sort();
-    mods.dedup();
 
     let mut get_versions = Vec::new();
     let mut download_mods = Vec::new();
