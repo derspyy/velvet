@@ -46,7 +46,7 @@ const OPTIFINE: [&str; 9] = [
 const MODRINTH_SERVER: &str = "https://api.modrinth.com/v2/project";
 
 enum Status {
-    Found(String, String, String),
+    Found(&'static str, String, String),
     NotFound(String),
 }
 
@@ -90,7 +90,6 @@ pub async fn run(
         }
     }
 
-
     let mut get_versions = Vec::new();
     let mut download_mods = Vec::new();
 
@@ -99,7 +98,7 @@ pub async fn run(
         get_versions.push(task);
     }
 
-    let mut new_mods: HashMap<String, String> = HashMap::new();
+    let mut new_mods = HashMap::new();
     let mut mods_not_found = Vec::new();
 
     for result in join_all(get_versions).await {
@@ -107,7 +106,7 @@ pub async fn run(
             Err(x) => return Err(x),
             Ok(Status::NotFound(x)) => mods_not_found.push(x),
             Ok(Status::Found(name, url, hash)) => {
-                match existing_mods.get(&name) {
+                match existing_mods.get(name) {
                     Some(x) if x == &hash => {
                         println!("Already found \x1b[35m{}\x1b[39m.", name)
                     }
@@ -124,7 +123,7 @@ pub async fn run(
     }
 
     for (name, hash) in existing_mods {
-        if new_mods.get(&name) != Some(&hash) {
+        if new_mods.get(name.as_str()) != Some(&hash) {
             println!("Removing \x1b[35m{}\x1b[39m.", name);
             remove_file(path_mods.join(name).with_extension("jar")).await?
         }
@@ -141,7 +140,7 @@ pub async fn run(
     Ok(mods_not_found)
 }
 
-async fn download_mod(url: String, file_name: String, path: PathBuf, client: Client) -> Result<()> {
+async fn download_mod(url: String, file_name: &str, path: PathBuf, client: Client) -> Result<()> {
     println!("Downloading \x1b[35m{}\x1b[39m.", file_name);
     let path = path.join(&file_name).with_extension("jar");
     let download = client.get(url).send().await?.bytes().await?;
@@ -151,7 +150,7 @@ async fn download_mod(url: String, file_name: String, path: PathBuf, client: Cli
     Ok(())
 }
 
-async fn check_latest(x: &str, client: Client, mc_version: String) -> Result<Status> {
+async fn check_latest(x: &'static str, client: Client, mc_version: String) -> Result<Status> {
     let mut modrinth_url = format!("{}/{}", MODRINTH_SERVER, x);
     let name_response: Value = client.get(&modrinth_url).send().await?.json().await?;
     let name = name_response["slug"]
@@ -178,7 +177,7 @@ async fn check_latest(x: &str, client: Client, mc_version: String) -> Result<Sta
             .as_str()
             .ok_or_else(|| anyhow!("Couldn't parse versions!"))?
             .into();
-        Ok(Status::Found(name, url, hash))
+        Ok(Status::Found(x, url, hash))
     } else {
         Ok(Status::NotFound(name))
     }
