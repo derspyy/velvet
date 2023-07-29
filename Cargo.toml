@@ -10,7 +10,7 @@ anyhow = "1"
 async-std = { version = "1.12.0", default-features = false, features = ["tokio1"]}
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 reqwest = { version = "0.11", features = ["json"] }
-iced = { version = "0.9", default-features = false, features = [ "image", "glow", "async-std" ] }
+iced = { version = "0.10", default-features = false, features = [ "image", "async-std" ] }
 iced_native = "0.10"
 image = { version = "0.24", default-features = false}
 serde = { version = "1.0", default-features = false, features = ["derive"] }

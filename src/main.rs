@@ -14,7 +14,7 @@ pub mod write_json;
 use iced::widget::{button, checkbox, column, pick_list, text, vertical_space};
 use iced::{
     executor, theme::Palette, window, Alignment, Application, Color, Command, Element, Length,
-    Settings, Theme,
+    Settings, Size, Theme,
 };
 
 #[derive(Deserialize)]
@@ -118,7 +118,7 @@ impl Application for Velvet {
                             run(value.clone(), values).map_err(|e| format!("{e}")),
                             Message::Done,
                         ));
-                        commands.push(resize(500, 250));
+                        commands.push(resize(Size::new(500, 250)));
                         return Command::batch(commands);
                     }
                     None => self.status = Status::NoVersion,
@@ -129,12 +129,12 @@ impl Application for Velvet {
                     true => self.status = Status::Success(None),
                     false => {
                         self.status = Status::Success(Some(x));
-                        return resize(500, 350);
+                        return resize(Size::new(500, 350));
                     }
                 },
                 Err(x) => {
                     self.status = Status::Failure(x);
-                    return resize(500, 275);
+                    return resize(Size::new(500, 275));
                 }
             },
         }
