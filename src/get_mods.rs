@@ -112,7 +112,7 @@ pub async fn run(
                     }
                     _ => download_mods.push(task::spawn(download_mod(
                         url,
-                        name.clone(),
+                        name,
                         path_mods.clone(),
                         client.clone(),
                     ))),
@@ -142,7 +142,7 @@ pub async fn run(
 
 async fn download_mod(url: String, file_name: &str, path: PathBuf, client: Client) -> Result<()> {
     println!("Downloading \x1b[35m{}\x1b[39m.", file_name);
-    let path = path.join(&file_name).with_extension("jar");
+    let path = path.join(file_name).with_extension("jar");
     let download = client.get(url).send().await?.bytes().await?;
     let mut mod_file = File::create(path).await?;
     mod_file.write(&download).await?;
