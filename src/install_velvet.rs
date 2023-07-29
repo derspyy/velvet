@@ -1,5 +1,3 @@
-use std::io;
-
 use crate::{get_minecraft_dir, write_json};
 use anyhow::{anyhow, Result};
 use async_std::fs::File;
