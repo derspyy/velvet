@@ -26,7 +26,8 @@ const VISUAL: [&str; 11] = [
     "Orvt0mRa", // indium
     "2Uev7LdA", // lambdabettergrass
     "1IjD5062", // continuity
-    "qvIfYCYJ", // qsl
+    // "qvIfYCYJ", qsl
+    "P7dR8mSH", // fabric-api
     "9s6osm5g", // cloth-config
     "YL57xq9U", // iris
 ];
@@ -40,7 +41,8 @@ const OPTIFINE: [&str; 9] = [
     "2Uev7LdA", // lambdabettergrass
     "otVJckYQ", // cit-resewn
     "BVzZfTc1", // entitytexturefeatures
-    "qvIfYCYJ", // qsl
+    // "qvIfYCYJ", qsl
+    "P7dR8mSH", // fabric-api
 ];
 
 const MODRINTH_SERVER: &str = "https://api.modrinth.com/v2/project";
