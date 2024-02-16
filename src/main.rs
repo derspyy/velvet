@@ -11,10 +11,10 @@ mod get_mods;
 mod install_velvet;
 pub mod write_json;
 
-use iced::widget::{button, checkbox, column, pick_list, text, vertical_space};
+use iced::widget::{button, checkbox, column, pick_list, text, Space};
 use iced::{
     executor, theme::Palette, window, Alignment, Application, Color, Command, Element, Length,
-    Settings, Size, Theme,
+    Settings, Theme,
 };
 
 #[derive(Deserialize)]
@@ -26,7 +26,7 @@ struct Versions {
 pub fn main() -> iced::Result {
     Velvet::run(Settings {
         window: window::Settings {
-            size: (500, 250),
+            size: [500, 250].into(),
             resizable: false,
             icon: window::icon::from_file_data(
                 include_bytes!("assets/icon.png"),
@@ -118,7 +118,7 @@ impl Application for Velvet {
                             run(value.clone(), values).map_err(|e| format!("{e}")),
                             Message::Done,
                         ));
-                        commands.push(resize(Size::new(500, 250)));
+                        commands.push(resize(window::Id::MAIN, [500, 250].into()));
                         return Command::batch(commands);
                     }
                     None => self.status = Status::NoVersion,
@@ -129,12 +129,12 @@ impl Application for Velvet {
                     true => self.status = Status::Success(None),
                     false => {
                         self.status = Status::Success(Some(x));
-                        return resize(Size::new(500, 350));
+                        return resize(window::Id::MAIN, [500, 350].into());
                     }
                 },
                 Err(x) => {
                     self.status = Status::Failure(x);
-                    return resize(Size::new(500, 275));
+                    return resize(window::Id::MAIN, [500, 275].into());
                 }
             },
         }
@@ -173,39 +173,36 @@ impl Application for Velvet {
             Status::Failure(message) => ("Error!", text(message).style(red).into()),
         };
         column![
-            vertical_space(Length::Fixed(10.0)),
+            Space::with_height(Length::Fixed(10.0)),
             text("Enter Minecraft version:").size(20),
-            vertical_space(Length::Fixed(5.0)),
-            pick_list(&self.version_list, self.version.clone(), Message::Update)
+            Space::with_height(Length::Fixed(5.0)),
+            pick_list(self.version_list.clone(), self.version.clone(), Message::Update)
                 .width(Length::Fixed(200.0)),
-            vertical_space(Length::Fixed(5.0)),
-            checkbox("Show snapshots", self.snapshot, Message::Snapshot),
-            vertical_space(Length::Fill),
+            Space::with_height(Length::Fixed(5.0)),
+            checkbox("Show snapshots", self.snapshot).on_toggle(Message::Snapshot),
+            Space::with_height(Length::Fill),
             column![
                 checkbox(
                     "Vanilla - Performance enhancing modlist.",
                     self.vanilla,
-                    Message::VButton
-                ),
-                vertical_space(Length::Fixed(5.0)),
+                ).on_toggle(Message::VButton),
+                Space::with_height(Length::Fixed(5.0)),
                 checkbox(
                     "Beauty - Immersive and beautiful modlist.",
                     self.beauty,
-                    Message::BButton
-                ),
-                vertical_space(Length::Fixed(5.0)),
+                ).on_toggle(Message::BButton),
+                Space::with_height(Length::Fixed(5.0)),
                 checkbox(
                     "Optifine - Optifine resource pack parity.",
                     self.optifine,
-                    Message::OButton
-                )
+                ).on_toggle(Message::OButton),
             ]
             .align_items(Alignment::Start),
-            vertical_space(Length::Fill),
+            Space::with_height(Length::Fill),
             extra_message,
-            vertical_space(Length::Fill),
+            Space::with_height(Length::Fill),
             button(button_message).on_press(Message::Pressed),
-            vertical_space(Length::Fixed(10.0)),
+            Space::with_height(Length::Fixed(10.0)),
         ]
         .align_items(Alignment::Center)
         .width(Length::Fill)
@@ -214,7 +211,7 @@ impl Application for Velvet {
     }
 
     fn theme(&self) -> Theme {
-        Theme::custom(Palette {
+        Theme::custom("Rosé Pine".to_string(), Palette {
             background: Color::from_rgb8(25, 23, 36),
             text: Color::from_rgb8(224, 222, 244),
             primary: Color::from_rgb8(235, 111, 146),
@@ -248,7 +245,7 @@ async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<Vec<Str
     Ok(errors)
 }
 
-async fn populate(x: bool) -> Vec<String> {
+async fn populate(snapshots: bool) -> Vec<String> {
     let mut versions_list = Vec::new();
     let response: Vec<Versions> = reqwest::get("https://meta.quiltmc.org/v3/versions/game")
         .await
@@ -258,7 +255,7 @@ async fn populate(x: bool) -> Vec<String> {
         .unwrap();
 
     for value in response {
-        if x || value.stable {
+        if snapshots || value.stable {
             versions_list.push(value.version)
         }
     }
