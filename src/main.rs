@@ -176,26 +176,24 @@ impl Application for Velvet {
             Space::with_height(Length::Fixed(10.0)),
             text("Enter Minecraft version:").size(20),
             Space::with_height(Length::Fixed(5.0)),
-            pick_list(self.version_list.clone(), self.version.clone(), Message::Update)
-                .width(Length::Fixed(200.0)),
+            pick_list(
+                self.version_list.clone(),
+                self.version.clone(),
+                Message::Update
+            )
+            .width(Length::Fixed(200.0)),
             Space::with_height(Length::Fixed(5.0)),
             checkbox("Show snapshots", self.snapshot).on_toggle(Message::Snapshot),
             Space::with_height(Length::Fill),
             column![
-                checkbox(
-                    "Vanilla - Performance enhancing modlist.",
-                    self.vanilla,
-                ).on_toggle(Message::VButton),
+                checkbox("Vanilla - Performance enhancing modlist.", self.vanilla,)
+                    .on_toggle(Message::VButton),
                 Space::with_height(Length::Fixed(5.0)),
-                checkbox(
-                    "Beauty - Immersive and beautiful modlist.",
-                    self.beauty,
-                ).on_toggle(Message::BButton),
+                checkbox("Beauty - Immersive and beautiful modlist.", self.beauty,)
+                    .on_toggle(Message::BButton),
                 Space::with_height(Length::Fixed(5.0)),
-                checkbox(
-                    "Optifine - Optifine resource pack parity.",
-                    self.optifine,
-                ).on_toggle(Message::OButton),
+                checkbox("Optifine - Optifine resource pack parity.", self.optifine,)
+                    .on_toggle(Message::OButton),
             ]
             .align_items(Alignment::Start),
             Space::with_height(Length::Fill),
@@ -211,13 +209,16 @@ impl Application for Velvet {
     }
 
     fn theme(&self) -> Theme {
-        Theme::custom("Rosé Pine".to_string(), Palette {
-            background: Color::from_rgb8(25, 23, 36),
-            text: Color::from_rgb8(224, 222, 244),
-            primary: Color::from_rgb8(235, 111, 146),
-            success: Color::from_rgb8(156, 207, 216),
-            danger: Color::from_rgb8(235, 111, 146),
-        })
+        Theme::custom(
+            "Rosé Pine".to_string(),
+            Palette {
+                background: Color::from_rgb8(25, 23, 36),
+                text: Color::from_rgb8(224, 222, 244),
+                primary: Color::from_rgb8(235, 111, 146),
+                success: Color::from_rgb8(156, 207, 216),
+                danger: Color::from_rgb8(235, 111, 146),
+            },
+        )
     }
 }
 
