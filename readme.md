@@ -2,7 +2,7 @@
 
 ^ cute icon by my friend [aria](https://twitter.com/flareslammer).
 
-![screenshot](https://github.com/derspyy/velvet/assets/65043391/ee517ec7-3921-42b6-a662-0d8d9b664fc0)
+<img width="612" alt="image" src="https://github.com/user-attachments/assets/91c3a928-1c7b-4056-9f0a-8c38b62a32c7">
 
 |download ⬇️|[windows](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-windows-latest.zip)|[linux](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-ubuntu-latest.zip)|[macos](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-macos-latest.zip)
 |-|-|-|-|
