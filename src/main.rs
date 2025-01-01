@@ -3,7 +3,7 @@
 use anyhow::Result;
 use iced::alignment::Horizontal;
 use iced::futures::TryFutureExt;
-use iced::window::resize;
+use iced::window::{resize, Id};
 use serde::Deserialize;
 
 mod get_minecraft_dir;
@@ -11,10 +11,9 @@ mod get_mods;
 mod install_velvet;
 pub mod write_json;
 
-use iced::widget::{button, checkbox, column, pick_list, text, Space};
+use iced::widget::{button, checkbox, column, pick_list, text, Column, Space};
 use iced::{
-    executor, theme::Palette, window, Alignment, Application, Color, Command, Element, Length,
-    Settings, Theme,
+    application, Size, theme::Palette, window, Alignment, Color, Element, Length, Task, Theme,
 };
 
 #[derive(Deserialize)]
@@ -24,19 +23,21 @@ struct Versions {
 }
 
 pub fn main() -> iced::Result {
-    Velvet::run(Settings {
-        window: window::Settings {
-            size: [500, 250].into(),
-            resizable: false,
-            icon: window::icon::from_file_data(
-                include_bytes!("assets/icon.png"),
-                Some(image::ImageFormat::Png),
-            )
-            .ok(),
-            ..window::Settings::default()
-        },
-        ..Settings::default()
-    })
+    application(Velvet::title, Velvet::update, Velvet::view)
+        .theme(Velvet::theme)
+        .window(
+            window::Settings {
+                size: Size::new(500.0, 250.0),
+                resizable: false,
+                icon: window::icon::from_file_data(
+                    include_bytes!("assets/icon.png"),
+                    Some(image::ImageFormat::Png),
+                ).ok(),
+                ..window::Settings::default()
+            },
+        )
+        .antialiasing(true)
+        .run_with(Velvet::new)
 }
 
 struct Velvet {
@@ -69,13 +70,8 @@ enum Message {
     Done(Result<Vec<String>, String>),
 }
 
-impl Application for Velvet {
-    type Executor = executor::Default;
-    type Message = Message;
-    type Theme = Theme;
-    type Flags = ();
-
-    fn new(_flags: ()) -> (Self, Command<Message>) {
+impl Velvet {
+    fn new() -> (Self, Task<Message>) {
         (
             Velvet {
                 version_list: Vec::new(),
@@ -86,7 +82,7 @@ impl Application for Velvet {
                 optifine: false,
                 status: Status::Idle,
             },
-            Command::perform(populate(false), Message::Populate),
+            Task::perform(populate(false), Message::Populate),
         )
     }
 
@@ -97,13 +93,13 @@ impl Application for Velvet {
         }
     }
 
-    fn update(&mut self, message: Message) -> Command<Message> {
+    fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::Populate(value) => self.version_list = value,
             Message::Update(value) => self.version = Some(value),
             Message::Snapshot(value) => {
                 self.snapshot = value;
-                return Command::perform(populate(value), Message::Populate);
+                return Task::perform(populate(value), Message::Populate);
             }
             Message::VButton(value) => self.vanilla = value,
             Message::BButton(value) => self.beauty = value,
@@ -114,12 +110,12 @@ impl Application for Velvet {
                         self.status = Status::Installing;
                         let values = (self.vanilla, self.beauty, self.optifine);
                         let mut commands = Vec::new();
-                        commands.push(Command::perform(
+                        commands.push(Task::perform(
                             run(value.clone(), values).map_err(|e| format!("{e}")),
                             Message::Done,
                         ));
-                        commands.push(resize(window::Id::MAIN, [500, 250].into()));
-                        return Command::batch(commands);
+                        commands.push(resize(Id::unique(), Size::new(500.0, 250.0)));
+                        return Task::batch(commands);
                     }
                     None => self.status = Status::NoVersion,
                 };
@@ -129,19 +125,19 @@ impl Application for Velvet {
                     true => self.status = Status::Success(None),
                     false => {
                         self.status = Status::Success(Some(x));
-                        return resize(window::Id::MAIN, [500, 350].into());
+                        return resize(Id::unique(), Size::new(500.0, 350.0))
                     }
                 },
                 Err(x) => {
                     self.status = Status::Failure(x);
-                    return resize(window::Id::MAIN, [500, 275].into());
+                    return resize(Id::unique(), Size::new(500.0, 275.0))
                 }
             },
         }
-        Command::none()
+        Task::none()
     }
 
-    fn view(&self) -> Element<Message> {
+    fn view(&self) -> Column<Message> {
         let red = Color::from_rgb8(235, 111, 146);
         let (button_message, extra_message): (&str, Element<Message>) = match &self.status {
             Status::Idle => ("Install", column!().into()),
@@ -160,17 +156,17 @@ impl Application for Velvet {
                         column![
                             text("The mods"),
                             text(mod_string)
-                                .style(red)
-                                .horizontal_alignment(Horizontal::Center),
+                                .color(red)
+                                .align_x(Horizontal::Center),
                             text("were unavailable.")
                         ]
-                        .align_items(Alignment::Center)
+                        .align_x(Alignment::Center)
                         .into()
                     }
                     None => column!().into(),
                 },
             ),
-            Status::Failure(message) => ("Error!", text(message).style(red).into()),
+            Status::Failure(message) => ("Error!", text(message).color(red).into()),
         };
         column![
             Space::with_height(Length::Fixed(10.0)),
@@ -195,14 +191,14 @@ impl Application for Velvet {
                 checkbox("Optifine - Optifine resource pack parity.", self.optifine,)
                     .on_toggle(Message::OButton),
             ]
-            .align_items(Alignment::Start),
+            .align_x(Alignment::Start),
             Space::with_height(Length::Fill),
             extra_message,
             Space::with_height(Length::Fill),
             button(button_message).on_press(Message::Pressed),
             Space::with_height(Length::Fixed(10.0)),
         ]
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .height(Length::Fill)
         .into()

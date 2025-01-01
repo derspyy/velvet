@@ -69,10 +69,7 @@ pub async fn run(
 
     let mut bytes = Vec::new();
     version_file.read_to_end(&mut bytes).await?;
-    let existing_mods: HashMap<String, String> = match serde_json::from_slice(&bytes) {
-        Ok(x) => x,
-        Err(_) => HashMap::new(),
-    };
+    let existing_mods: HashMap<String, String> = serde_json::from_slice(&bytes).unwrap_or_default();
 
     let mut mods = HashSet::new();
 

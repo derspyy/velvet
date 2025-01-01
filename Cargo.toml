@@ -11,8 +11,8 @@ async-std = { version = "1.12.0", default-features = false, features = [
     "tokio1",
 ] }
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
-reqwest = { version = "0.12", features = ["json"] }
-iced = { version = "0.12", default-features = false, features = [
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+iced = { version = "0.13", features = [
     "image",
     "async-std",
 ] }
@@ -21,7 +21,7 @@ image = { version = "0.24", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0", default-features = false }
 home = "0.5"
-rfd = "0.14"
+rfd = "0.15"
 
 [profile.release]
 lto = true
