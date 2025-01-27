@@ -93,7 +93,8 @@ impl Velvet {
         }
     }
 
-    fn update(&mut self, message: Message) -> Task<Message> {
+    fn update(
+        &mut self, message: Message) -> Task<Message> {
         match message {
             Message::Populate(value) => self.version_list = value,
             Message::Update(value) => self.version = Some(value),
@@ -201,7 +202,6 @@ impl Velvet {
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .height(Length::Fill)
-        .into()
     }
 
     fn theme(&self) -> Theme {
