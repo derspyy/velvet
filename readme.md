@@ -4,9 +4,10 @@
 
 <img width="612" alt="image" src="https://github.com/user-attachments/assets/91c3a928-1c7b-4056-9f0a-8c38b62a32c7">
 
-|download ⬇️|[windows](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-windows-latest.zip)|[linux](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-ubuntu-latest.zip)|[macos](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-macos-latest.zip)
-|nightly 🌙|[windows](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-windows-latest.zip)|[linux](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-ubuntu-latest.zip)|[macos](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-macos-latest.zip)
+|version|linux|macos|windows|
 |-|-|-|-|
+|stable ☀️|[linux stable](https://github.com/derspyy/velvet/releases/latest/download/velvet-ubuntu-latest)|[macos stable](https://github.com/derspyy/velvet/releases/latest/download/velvet-macos-latest)|[windows stable](https://github.com/derspyy/velvet/releases/latest/download/velvet-windows-latest)|
+|nightly 🌙|[linux nightly](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-ubuntu-latest.zip)|[macos nightly](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-macos-latest.zip)|[windows nightly](https://nightly.link/derspyy/velvet/workflows/rust/main/velvet-windows-latest.zip)|
 
 this is a [quilt](https://quiltmc.org) installer that installs (imo) essential minecraft mods.
 i made it because i know people that dislike manually installing quilt and downloading optimization mods from [modrinth](https://modrinth.com).
