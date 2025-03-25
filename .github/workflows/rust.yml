@@ -44,7 +44,7 @@ jobs:
     - name: Build
       run: cargo build --release --verbose
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4
       with:
         name: velvet-${{ matrix.os }}
         path: ${{ matrix.path }}
