@@ -4359,7 +4359,7 @@ checksum = "943ce29a8a743eb10d6082545d861b24f9d1b160b7d741e0f2cdf726bec909c5"
 
 [[package]]
 name = "velvet-minecraft"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "async-std",
