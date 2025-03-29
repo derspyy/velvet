@@ -3,7 +3,6 @@
 use anyhow::Result;
 use iced::alignment::Horizontal;
 use iced::futures::TryFutureExt;
-use iced::window::{resize, Id};
 use serde::Deserialize;
 
 mod get_minecraft_dir;
@@ -13,7 +12,7 @@ pub mod write_json;
 
 use iced::widget::{button, checkbox, column, pick_list, text, Column, Space};
 use iced::{
-    application, Size, theme::Palette, window, Alignment, Color, Element, Length, Task, Theme,
+    application, theme::Palette, window, Alignment, Color, Element, Length, Size, Task, Theme,
 };
 
 #[derive(Deserialize)]
@@ -25,17 +24,16 @@ struct Versions {
 pub fn main() -> iced::Result {
     application(Velvet::title, Velvet::update, Velvet::view)
         .theme(Velvet::theme)
-        .window(
-            window::Settings {
-                size: Size::new(500.0, 250.0),
-                resizable: false,
-                icon: window::icon::from_file_data(
-                    include_bytes!("assets/icon.png"),
-                    Some(image::ImageFormat::Png),
-                ).ok(),
-                ..window::Settings::default()
-            },
-        )
+        .window(window::Settings {
+            size: Size::new(500.0, 250.0),
+            resizable: false,
+            icon: window::icon::from_file_data(
+                include_bytes!("assets/icon.png"),
+                Some(image::ImageFormat::Png),
+            )
+            .ok(),
+            ..window::Settings::default()
+        })
         .antialiasing(true)
         .run_with(Velvet::new)
 }
@@ -93,8 +91,7 @@ impl Velvet {
         }
     }
 
-    fn update(
-        &mut self, message: Message) -> Task<Message> {
+    fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::Populate(value) => self.version_list = value,
             Message::Update(value) => self.version = Some(value),
@@ -115,7 +112,10 @@ impl Velvet {
                             run(value.clone(), values).map_err(|e| format!("{e}")),
                             Message::Done,
                         ));
-                        commands.push(resize(Id::unique(), Size::new(500.0, 250.0)));
+                        commands.push(
+                            window::get_oldest()
+                                .and_then(move |id| window::resize(id, (500.0, 250.0).into())),
+                        );
                         return Task::batch(commands);
                     }
                     None => self.status = Status::NoVersion,
@@ -126,12 +126,14 @@ impl Velvet {
                     true => self.status = Status::Success(None),
                     false => {
                         self.status = Status::Success(Some(x));
-                        return resize(Id::unique(), Size::new(500.0, 350.0))
+                        return window::get_latest()
+                            .and_then(move |id| window::resize(id, (500.0, 350.0).into()));
                     }
                 },
                 Err(x) => {
                     self.status = Status::Failure(x);
-                    return resize(Id::unique(), Size::new(500.0, 275.0))
+                    return window::get_latest()
+                        .and_then(move |id| window::resize(id, (500.0, 275.0).into()));
                 }
             },
         }
@@ -156,9 +158,7 @@ impl Velvet {
                         }
                         column![
                             text("The mods"),
-                            text(mod_string)
-                                .color(red)
-                                .align_x(Horizontal::Center),
+                            text(mod_string).color(red).align_x(Horizontal::Center),
                             text("were unavailable.")
                         ]
                         .align_x(Alignment::Center)
