@@ -93,7 +93,10 @@ impl Velvet {
 
     fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::Populate(value) => self.version_list = value,
+            Message::Populate(value) => {
+                self.version = Some(value[0].clone());
+                self.version_list = value;
+            }
             Message::Update(value) => self.version = Some(value),
             Message::Snapshot(value) => {
                 self.snapshot = value;
