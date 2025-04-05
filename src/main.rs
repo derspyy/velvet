@@ -180,7 +180,7 @@ impl Velvet {
                 self.version_list.clone(),
                 self.version.clone(),
                 Message::Update
-            )
+            ).placeholder("Loading...")
             .width(Length::Fixed(200.0)),
             Space::with_height(Length::Fixed(5.0)),
             checkbox("Show snapshots", self.snapshot).on_toggle(Message::Snapshot),
