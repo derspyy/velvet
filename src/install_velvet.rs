@@ -1,5 +1,5 @@
 use crate::{get_minecraft_dir, write_json};
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use async_std::fs::File;
 use async_std::fs::{self, create_dir_all};
 use async_std::path::PathBuf;
@@ -23,7 +23,7 @@ pub async fn run(mc_version: &String, quilt_version: &String) -> Result<(PathBuf
 
     let mut path_versions: PathBuf = PathBuf::from(&velvet_path).join("versions");
     let parent_dir = path_versions.clone();
-    path_versions.push(format!("{}.json", mc_version));
+    path_versions.push(format!("{mc_version}.json"));
     if !path_versions.exists().await {
         create_dir_all(parent_dir).await?;
         File::create(&path_versions).await?;
@@ -37,7 +37,7 @@ pub async fn run(mc_version: &String, quilt_version: &String) -> Result<(PathBuf
         .join("versions")
         .join(&version_folder_name);
     fs::create_dir_all(&path_version).await?;
-    path_version.push(format!("{}.jar", version_folder_name));
+    path_version.push(format!("{version_folder_name}.jar"));
     fs::File::create(&path_version).await?; // dummy jar required by the launcher.
 
     path_version.set_extension("json");

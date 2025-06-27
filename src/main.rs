@@ -10,9 +10,9 @@ mod get_mods;
 mod install_velvet;
 pub mod write_json;
 
-use iced::widget::{button, checkbox, column, pick_list, text, Column, Space};
+use iced::widget::{Column, Space, button, checkbox, column, pick_list, text};
 use iced::{
-    application, theme::Palette, window, Alignment, Color, Element, Length, Size, Task, Theme,
+    Alignment, Color, Element, Length, Size, Task, Theme, application, theme::Palette, window,
 };
 
 #[derive(Deserialize)]
@@ -180,7 +180,8 @@ impl Velvet {
                 self.version_list.clone(),
                 self.version.clone(),
                 Message::Update
-            ).placeholder("Loading...")
+            )
+            .placeholder("Loading...")
             .width(Length::Fixed(200.0)),
             Space::with_height(Length::Fixed(5.0)),
             checkbox("Show snapshots", self.snapshot).on_toggle(Message::Snapshot),

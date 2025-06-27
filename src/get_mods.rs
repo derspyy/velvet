@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use async_std::fs::remove_file;
 use async_std::{fs::File, path::PathBuf};
 use async_std::{prelude::*, task};
@@ -107,7 +107,7 @@ pub async fn run(
             Ok(Status::Found(name, url, hash)) => {
                 match existing_mods.get(name) {
                     Some(x) if x == &hash => {
-                        println!("Already found \x1b[35m{}\x1b[39m.", name)
+                        println!("Already found \x1b[35m{name}\x1b[39m.")
                     }
                     _ => download_mods.push(task::spawn(download_mod(
                         url,
@@ -123,7 +123,7 @@ pub async fn run(
 
     for (name, hash) in existing_mods {
         if new_mods.get(name.as_str()) != Some(&hash) {
-            println!("Removing \x1b[35m{}\x1b[39m.", name);
+            println!("Removing \x1b[35m{name}\x1b[39m.");
             remove_file(path_mods.join(name).with_extension("jar")).await?
         }
     }
@@ -140,17 +140,17 @@ pub async fn run(
 }
 
 async fn download_mod(url: String, file_name: &str, path: PathBuf, client: Client) -> Result<()> {
-    println!("Downloading \x1b[35m{}\x1b[39m.", file_name);
+    println!("Downloading \x1b[35m{file_name}\x1b[39m.");
     let path = path.join(file_name).with_extension("jar");
     let download = client.get(url).send().await?.bytes().await?;
     let mut mod_file = File::create(path).await?;
     mod_file.write(&download).await?;
-    println!("Finished downloading \x1b[35m{}\x1b[39m.", file_name);
+    println!("Finished downloading \x1b[35m{file_name}\x1b[39m.");
     Ok(())
 }
 
 async fn check_latest(x: &'static str, client: Client, mc_version: String) -> Result<Status> {
-    let mut modrinth_url = format!("{}/{}", MODRINTH_SERVER, x);
+    let mut modrinth_url = format!("{MODRINTH_SERVER}/{x}");
     let name_response: Value = client.get(&modrinth_url).send().await?.json().await?;
     let name = name_response["slug"]
         .as_str()
@@ -158,8 +158,7 @@ async fn check_latest(x: &'static str, client: Client, mc_version: String) -> Re
         .to_owned();
 
     modrinth_url = format!(
-        "{}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{:?}]",
-        modrinth_url, mc_version
+        "{modrinth_url}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{mc_version:?}]"
     );
 
     let version_response: Value = client.get(&modrinth_url).send().await?.json().await?;
