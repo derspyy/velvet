@@ -8,12 +8,11 @@ use serde::Deserialize;
 mod get_minecraft_dir;
 mod get_mods;
 mod install_velvet;
+mod theme;
 pub mod write_json;
 
 use iced::widget::{Column, Space, button, checkbox, column, pick_list, text};
-use iced::{
-    Alignment, Color, Element, Length, Size, Task, Theme, application, theme::Palette, window,
-};
+use iced::{Alignment, Element, Length, Size, Task, Theme, application, theme::Palette, window};
 
 #[derive(Deserialize)]
 struct Versions {
@@ -144,7 +143,6 @@ impl Velvet {
     }
 
     fn view(&self) -> Column<Message> {
-        let red = Color::from_rgb8(235, 111, 146);
         let (button_message, extra_message): (&str, Element<Message>) = match &self.status {
             Status::Idle => ("Install", column!().into()),
             Status::Installing => ("Installing...", column!().into()),
@@ -161,7 +159,9 @@ impl Velvet {
                         }
                         column![
                             text("The mods"),
-                            text(mod_string).color(red).align_x(Horizontal::Center),
+                            text(mod_string)
+                                .color(theme::LOVE)
+                                .align_x(Horizontal::Center),
                             text("were unavailable.")
                         ]
                         .align_x(Alignment::Center)
@@ -170,7 +170,7 @@ impl Velvet {
                     None => column!().into(),
                 },
             ),
-            Status::Failure(message) => ("Error!", text(message).color(red).into()),
+            Status::Failure(message) => ("Error!", text(message).color(theme::LOVE).into()),
         };
         column![
             Space::with_height(Length::Fixed(10.0)),
@@ -182,25 +182,34 @@ impl Velvet {
                 Message::Update
             )
             .placeholder("Loading...")
-            .width(Length::Fixed(200.0)),
+            .width(Length::Fixed(200.0))
+            .style(|_, status| theme::pick_list_style(status))
+            .menu_style(|_| theme::menu_style()),
             Space::with_height(Length::Fixed(5.0)),
-            checkbox("Show snapshots", self.snapshot).on_toggle(Message::Snapshot),
+            checkbox("Show snapshots", self.snapshot)
+                .on_toggle(Message::Snapshot)
+                .style(|_, status| theme::checkbox_style(status)),
             Space::with_height(Length::Fill),
             column![
                 checkbox("Vanilla - Performance enhancing modlist.", self.vanilla,)
-                    .on_toggle(Message::VButton),
+                    .on_toggle(Message::VButton)
+                    .style(|_, status| theme::checkbox_style(status)),
                 Space::with_height(Length::Fixed(5.0)),
                 checkbox("Beauty - Immersive and beautiful modlist.", self.beauty,)
-                    .on_toggle(Message::BButton),
+                    .on_toggle(Message::BButton)
+                    .style(|_, status| theme::checkbox_style(status)),
                 Space::with_height(Length::Fixed(5.0)),
                 checkbox("Optifine - Optifine resource pack parity.", self.optifine,)
-                    .on_toggle(Message::OButton),
+                    .on_toggle(Message::OButton)
+                    .style(|_, status| theme::checkbox_style(status)),
             ]
             .align_x(Alignment::Start),
             Space::with_height(Length::Fill),
             extra_message,
             Space::with_height(Length::Fill),
-            button(button_message).on_press(Message::Pressed),
+            button(button_message)
+                .on_press(Message::Pressed)
+                .style(|_, status| theme::button_style(status)),
             Space::with_height(Length::Fixed(10.0)),
         ]
         .align_x(Alignment::Center)
@@ -212,11 +221,11 @@ impl Velvet {
         Theme::custom(
             "Rosé Pine".to_string(),
             Palette {
-                background: Color::from_rgb8(25, 23, 36),
-                text: Color::from_rgb8(224, 222, 244),
-                primary: Color::from_rgb8(235, 111, 146),
-                success: Color::from_rgb8(156, 207, 216),
-                danger: Color::from_rgb8(235, 111, 146),
+                background: theme::BASE,
+                text: theme::TEXT,
+                primary: theme::LOVE,
+                success: theme::FOAM,
+                danger: theme::LOVE,
             },
         )
     }
