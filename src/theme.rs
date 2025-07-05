@@ -1,9 +1,9 @@
 use iced::{
-    Background, Border, Color, Shadow, Vector,
+    Background, Border, Color, Shadow, Theme, Vector,
     border::Radius,
     color,
     overlay::menu,
-    widget::{button, checkbox, pick_list},
+    widget::{button, checkbox, container, pick_list},
 };
 
 // rosé pine.
@@ -15,7 +15,24 @@ pub const SUBTLE: Color = color!(0x908caa);
 pub const LOVE: Color = color!(0xeb6f92);
 pub const FOAM: Color = color!(0x9ccfd8);
 
-pub fn pick_list_style(status: pick_list::Status) -> pick_list::Style {
+pub fn container_style(_: &Theme) -> container::Style {
+    container::Style {
+        text_color: None,
+        background: Some(Background::Color(BASE)),
+        border: Border {
+            color: LOVE,
+            width: 1.0,
+            radius: Radius::new(10.0),
+        },
+        shadow: Shadow {
+            color: BASE,
+            offset: Vector::new(0.0, 0.0),
+            blur_radius: 0.0,
+        },
+    }
+}
+
+pub fn pick_list_style(_: &Theme, status: pick_list::Status) -> pick_list::Style {
     pick_list::Style {
         text_color: TEXT,
         placeholder_color: SUBTLE,
@@ -32,7 +49,7 @@ pub fn pick_list_style(status: pick_list::Status) -> pick_list::Style {
     }
 }
 
-pub fn menu_style() -> menu::Style {
+pub fn menu_style(_: &Theme) -> menu::Style {
     menu::Style {
         text_color: TEXT,
         background: Background::Color(SURFACE),
@@ -46,7 +63,7 @@ pub fn menu_style() -> menu::Style {
     }
 }
 
-pub fn checkbox_style(status: checkbox::Status) -> checkbox::Style {
+pub fn checkbox_style(_: &Theme, status: checkbox::Status) -> checkbox::Style {
     checkbox::Style {
         background: Background::Color(match status {
             checkbox::Status::Active { is_checked } if is_checked => FOAM,
@@ -64,7 +81,7 @@ pub fn checkbox_style(status: checkbox::Status) -> checkbox::Style {
     }
 }
 
-pub fn button_style(status: button::Status) -> button::Style {
+pub fn button_style(_: &Theme, status: button::Status) -> button::Style {
     button::Style {
         background: Some(Background::Color(LOVE)),
         text_color: match status {
