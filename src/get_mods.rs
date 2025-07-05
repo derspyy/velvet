@@ -7,7 +7,7 @@ use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 
-const VANILLA: [&str; 7] = [
+const VANILLA: [&str; 9] = [
     "AANobbMI", // sodium
     "gvQqBUqZ", // lithium
     "hEOCdOgW", // phosphor
@@ -15,6 +15,8 @@ const VANILLA: [&str; 7] = [
     "uXXizFIs", // ferrite-core
     "fQEb0iXm", // krypton
     "5ZwdcRci", // immediatelyfast
+    "VSNURh3q", // c2me-fabric
+    "KuNKN7d2", // noisium
 ];
 
 const VISUAL: [&str; 11] = [
@@ -25,10 +27,10 @@ const VISUAL: [&str; 11] = [
     "Orvt0mRa", // indium
     "2Uev7LdA", // lambdabettergrass
     "1IjD5062", // continuity
-    "P7dR8mSH", // fabric-api
-    "9s6osm5g", // cloth-config
     "YL57xq9U", // iris
     "uCdwusMi", // distanthorizons
+    "P7dR8mSH", // fabric-api
+    "9s6osm5g", // cloth-config
 ];
 
 const OPTIFINE: [&str; 9] = [
