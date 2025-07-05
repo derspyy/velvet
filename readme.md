@@ -1,8 +1,8 @@
-# ![icon](src/assets/icon.png) velvet for minecraft
+# ![icon](src/assets/icon.png) velvet for minecraft.
 
 ^ cute icon by my friend [aria](https://twitter.com/flareslammer).
 
-<img width="612" alt="image" src="https://github.com/user-attachments/assets/91c3a928-1c7b-4056-9f0a-8c38b62a32c7">
+<img width="612" alt="image" src="https://github.com/user-attachments/assets/041f56f8-e403-483f-8790-f683e82ffe63" />
 
 |version|linux|macos|windows|
 |-|-|-|-|
