@@ -21,15 +21,14 @@ const VISUAL: [&str; 11] = [
     "pcPXJeZi", // effective
     "yBW8D80W", // lambdynamiclights
     "MPCX6s5C", // not-enough-animations
-    "WhbRG4iK", // fallingleaves
     "mfzaZK3Z", // ears
     "Orvt0mRa", // indium
     "2Uev7LdA", // lambdabettergrass
     "1IjD5062", // continuity
-    // "qvIfYCYJ", qsl
     "P7dR8mSH", // fabric-api
     "9s6osm5g", // cloth-config
     "YL57xq9U", // iris
+    "uCdwusMi", // distanthorizons
 ];
 
 const OPTIFINE: [&str; 9] = [
