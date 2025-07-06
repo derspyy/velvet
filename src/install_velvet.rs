@@ -1,12 +1,12 @@
 use crate::{get_minecraft_dir, write_json};
 use anyhow::{Result, anyhow};
+use async_std::fs;
 use async_std::fs::File;
-use async_std::fs::{self, create_dir_all};
 use async_std::path::PathBuf;
 use async_std::prelude::*;
 use rfd::AsyncFileDialog;
 
-pub async fn run(mc_version: &String, quilt_version: &String) -> Result<(PathBuf, PathBuf)> {
+pub async fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf> {
     let mut mc_path: PathBuf = get_minecraft_dir::dir()?;
     while !mc_path.is_dir().await {
         mc_path = std::path::PathBuf::from(
@@ -20,14 +20,6 @@ pub async fn run(mc_version: &String, quilt_version: &String) -> Result<(PathBuf
     }
 
     let velvet_path = PathBuf::from(&mc_path).join(".velvet");
-
-    let mut path_versions: PathBuf = PathBuf::from(&velvet_path).join("versions");
-    let parent_dir = path_versions.clone();
-    path_versions.push(format!("{mc_version}.json"));
-    if !path_versions.exists().await {
-        create_dir_all(parent_dir).await?;
-        File::create(&path_versions).await?;
-    }
     let path_mods = PathBuf::from(&velvet_path).join("mods").join(mc_version);
 
     fs::create_dir_all(&path_mods).await?;
@@ -53,5 +45,5 @@ pub async fn run(mc_version: &String, quilt_version: &String) -> Result<(PathBuf
     launcher_file = File::create(&mc_path).await?;
     launcher_file.write_all(profile.as_bytes()).await?;
 
-    Ok((path_mods, path_versions))
+    Ok(path_mods)
 }

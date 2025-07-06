@@ -1,10 +1,11 @@
-use anyhow::{Result, anyhow};
-use async_std::fs::remove_file;
+use anyhow::Result;
+use async_std::fs::{read, read_dir, remove_file};
 use async_std::{fs::File, path::PathBuf};
 use async_std::{prelude::*, task};
-use iced::futures::future::join_all;
+use iced::futures::future::{join_all, try_join_all};
 use reqwest::{Client, ClientBuilder};
-use serde_json::Value;
+use serde::Deserialize;
+use sha1::{Digest, Sha1};
 use std::collections::{HashMap, HashSet};
 
 const VANILLA: [&str; 9] = [
@@ -53,10 +54,31 @@ enum Status {
     NotFound(String),
 }
 
+#[derive(Deserialize)]
+struct Project {
+    slug: String,
+}
+
+#[derive(Deserialize)]
+struct Version {
+    files: Vec<VersionFile>,
+}
+
+#[derive(Deserialize)]
+struct VersionFile {
+    url: String,
+    hashes: Hashes,
+}
+
+#[derive(Deserialize)]
+struct Hashes {
+    sha1: String,
+}
+
 pub async fn run(
     mc_version: String,
     modlist: &(bool, bool, bool),
-    (path_mods, version_file_path): (PathBuf, PathBuf),
+    path_mods: PathBuf,
 ) -> Result<Vec<String>> {
     let client = ClientBuilder::new()
         .user_agent(concat!(
@@ -66,11 +88,21 @@ pub async fn run(
         ))
         .build()?;
 
-    let mut version_file = File::open(&version_file_path).await?;
+    let mut existing_mods = HashMap::new();
+    let mut mod_folder_reader = read_dir(&path_mods).await?;
 
-    let mut bytes = Vec::new();
-    version_file.read_to_end(&mut bytes).await?;
-    let existing_mods: HashMap<String, String> = serde_json::from_slice(&bytes).unwrap_or_default();
+    while let Some(res) = mod_folder_reader.next().await {
+        let file = res?;
+
+        let file_name = file.file_name().to_string_lossy().to_string();
+        let mod_id = String::from(&file_name[0..8]);
+        let file_bytes = read(file.path()).await?;
+
+        let result = Sha1::digest(file_bytes);
+        let hash_hex = hex::encode(result);
+
+        existing_mods.insert(mod_id, hash_hex);
+    }
 
     let mut mods = HashSet::new();
 
@@ -129,14 +161,7 @@ pub async fn run(
         }
     }
 
-    join_all(download_mods).await;
-
-    let mut version_file = File::create(version_file_path).await?;
-
-    version_file
-        .write_all(&serde_json::to_vec_pretty(&new_mods)?)
-        .await?;
-
+    try_join_all(download_mods).await?;
     Ok(mods_not_found)
 }
 
@@ -152,32 +177,20 @@ async fn download_mod(url: String, file_name: &str, path: PathBuf, client: Clien
 
 async fn check_latest(x: &'static str, client: Client, mc_version: String) -> Result<Status> {
     let mut modrinth_url = format!("{MODRINTH_SERVER}/{x}");
-    let name_response: Value = client.get(&modrinth_url).send().await?.json().await?;
-    let name = name_response["slug"]
-        .as_str()
-        .ok_or_else(|| anyhow!("Couldn't get project name!"))?
-        .to_owned();
+    let project: Project = client.get(&modrinth_url).send().await?.json().await?;
 
     modrinth_url = format!(
         "{modrinth_url}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{mc_version:?}]"
     );
 
-    let version_response: Value = client.get(&modrinth_url).send().await?.json().await?;
-    let versions = match version_response[0]["files"].as_array() {
-        Some(x) => x,
-        None => return Ok(Status::NotFound(name)),
-    };
-    if !versions.is_empty() {
-        let url = versions[0]["url"]
-            .as_str()
-            .ok_or_else(|| anyhow!("Couldn't parse versions!"))?
-            .into();
-        let hash = versions[0]["hashes"]["sha1"]
-            .as_str()
-            .ok_or_else(|| anyhow!("Couldn't parse versions!"))?
-            .into();
+    let version_response: Vec<Version> = client.get(&modrinth_url).send().await?.json().await?;
+    if let Some(version) = version_response.first()
+        && let Some(file) = version.files.first()
+    {
+        let url = file.url.to_owned();
+        let hash = file.hashes.sha1.to_owned();
         Ok(Status::Found(x, url, hash))
     } else {
-        Ok(Status::NotFound(name))
+        Ok(Status::NotFound(project.slug))
     }
 }

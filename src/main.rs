@@ -110,7 +110,10 @@ impl Velvet {
                         let values = (self.vanilla, self.beauty, self.optifine);
                         let mut commands = Vec::new();
                         commands.push(Task::perform(
-                            run(value.clone(), values).map_err(|e| format!("{e}")),
+                            run(value.clone(), values).map_err(|e| {
+                                eprintln!("{e:#?}");
+                                format!("{e}")
+                            }),
                             Message::Done,
                         ));
                         commands.push(
@@ -249,8 +252,8 @@ async fn run(mc_version: String, modlists: (bool, bool, bool)) -> Result<Vec<Str
     }
 
     let path_mods = install_velvet::run(&mc_version, &quilt_version).await?;
-    let errors = get_mods::run(mc_version, &modlists, path_mods).await?;
-    Ok(errors)
+    let missing = get_mods::run(mc_version, &modlists, path_mods).await?;
+    Ok(missing)
 }
 
 async fn populate(snapshots: bool) -> Vec<String> {
