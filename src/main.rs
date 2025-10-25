@@ -144,7 +144,7 @@ impl Velvet {
         Task::none()
     }
 
-    fn view(&self) -> Column<Message> {
+    fn view(&self) -> Column<'_, Message> {
         let (button_message, extra_message): (&str, Option<Element<Message>>) = match &self.status {
             Status::Idle => ("Install", None),
             Status::Installing => ("Installing...", None),
