@@ -27,7 +27,7 @@ pub fn main() -> iced::Result {
             size: Size::new(500.0, 250.0),
             resizable: false,
             icon: window::icon::from_file_data(
-                include_bytes!("assets/icon.png"),
+                include_bytes!("../res/icon.png"),
                 Some(image::ImageFormat::Png),
             )
             .ok(),
