@@ -61,13 +61,13 @@ jobs:
         file: ${{ matrix.path }}
         asset_name: ${{ matrix.filename }}
         tag: ${{ github.ref }}
-    - name: Prepate AppImage Build
+    - name: Prepare AppImage Build
       if: ${{ matrix.linux }}
       run: |
         mkdir -p AppDir/usr/bin
         cp target/release/velvet-minecraft AppDir/usr/bin
         mkdir -p AppDir/usr/share/icons
-        mv res/icon.png Appdir/usr/share/icons/velvet-minecraft.png
+        mv res/icon.png AppDir/usr/share/icons/velvet-minecraft.png
         mkdir AppDir/usr/share/applications
     - name: Build AppImage
       if: ${{ matrix.linux }}
