@@ -1,4 +1,4 @@
-# ![icon](src/assets/icon.png) velvet for minecraft.
+# ![icon](res/icon.png) velvet for minecraft.
 
 ^ cute icon by my friend [aria](https://twitter.com/flareslammer).
 
