@@ -7,14 +7,12 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1"
-async-std = { version = "1.12.0", default-features = false, features = [
-    "tokio1",
-] }
+tokio = { version = "1", features = ["fs"] }
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 iced = { version = "0.13", features = [
     "image",
-    "async-std",
+    "tokio",
 ] }
 iced_native = "0.10"
 image = { version = "0.24", default-features = false }
@@ -22,8 +20,7 @@ serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0", default-features = false }
 home = "0.5"
 rfd = "0.15"
-crypto = "0.5.1"
-sha1 = "0.10.6"
+sha1 = { version = "0.10.6", features = ["asm"] }
 hex = "0.4.3"
 
 [profile.release]

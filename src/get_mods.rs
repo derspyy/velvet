@@ -1,12 +1,14 @@
+use std::path::PathBuf;
+use std::collections::{HashMap, HashSet};
+
 use anyhow::Result;
-use async_std::fs::{read, read_dir, remove_file};
-use async_std::{fs::File, path::PathBuf};
-use async_std::{prelude::*, task};
-use iced::futures::future::{join_all, try_join_all};
+use tokio::fs;
+use tokio::io::AsyncWriteExt;
+use tokio::task::spawn;
+use iced::futures::future::try_join_all;
 use reqwest::{Client, ClientBuilder};
 use serde::Deserialize;
 use sha1::{Digest, Sha1};
-use std::collections::{HashMap, HashSet};
 
 const VANILLA: [&str; 9] = [
     "AANobbMI", // sodium
@@ -89,14 +91,12 @@ pub async fn run(
         .build()?;
 
     let mut existing_mods = HashMap::new();
-    let mut mod_folder_reader = read_dir(&path_mods).await?;
+    let mut mod_folder_reader = fs::read_dir(&path_mods).await?;
 
-    while let Some(res) = mod_folder_reader.next().await {
-        let file = res?;
-
+    while let Some(file) = mod_folder_reader.next_entry().await? {
         let file_name = file.file_name().to_string_lossy().to_string();
         let mod_id = String::from(&file_name[0..8]);
-        let file_bytes = read(file.path()).await?;
+        let file_bytes = fs::read(file.path()).await?;
 
         let result = Sha1::digest(file_bytes);
         let hash_hex = hex::encode(result);
@@ -126,23 +126,22 @@ pub async fn run(
     let mut download_mods = Vec::new();
 
     for x in mods {
-        let task = task::spawn(check_latest(x, client.clone(), mc_version.clone()));
+        let task = spawn(check_latest(x, client.clone(), mc_version.clone()));
         get_versions.push(task);
     }
 
     let mut new_mods = HashMap::new();
     let mut mods_not_found = Vec::new();
 
-    for result in join_all(get_versions).await {
-        match result {
-            Err(x) => return Err(x),
-            Ok(Status::NotFound(x)) => mods_not_found.push(x),
-            Ok(Status::Found(name, url, hash)) => {
+    for result in try_join_all(get_versions).await? {
+        match result? {
+            Status::NotFound(x) => mods_not_found.push(x),
+            Status::Found(name, url, hash) => {
                 match existing_mods.get(name) {
                     Some(x) if x == &hash => {
                         println!("Already found \x1b[35m{name}\x1b[39m.")
                     }
-                    _ => download_mods.push(task::spawn(download_mod(
+                    _ => download_mods.push(spawn(download_mod(
                         url,
                         name,
                         path_mods.clone(),
@@ -157,7 +156,7 @@ pub async fn run(
     for (name, hash) in existing_mods {
         if new_mods.get(name.as_str()) != Some(&hash) {
             println!("Removing \x1b[35m{name}\x1b[39m.");
-            remove_file(path_mods.join(name).with_extension("jar")).await?
+            fs::remove_file(path_mods.join(name).with_extension("jar")).await?
         }
     }
 
@@ -169,7 +168,7 @@ async fn download_mod(url: String, file_name: &str, path: PathBuf, client: Clien
     println!("Downloading \x1b[35m{file_name}\x1b[39m.");
     let path = path.join(file_name).with_extension("jar");
     let download = client.get(url).send().await?.bytes().await?;
-    let mut mod_file = File::create(path).await?;
+    let mut mod_file = fs::File::create(path).await?;
     mod_file.write(&download).await?;
     println!("Finished downloading \x1b[35m{file_name}\x1b[39m.");
     Ok(())

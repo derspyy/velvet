@@ -1,6 +1,7 @@
 #[allow(unused_imports)]
+use std::path::PathBuf;
+
 use anyhow::{Result, anyhow};
-use async_std::path::PathBuf;
 use home::home_dir;
 
 #[cfg(target_os = "windows")]

@@ -1,14 +1,15 @@
-use crate::{get_minecraft_dir, write_json};
+use std::path::PathBuf;
+
 use anyhow::{Result, anyhow};
-use async_std::fs;
-use async_std::fs::File;
-use async_std::path::PathBuf;
-use async_std::prelude::*;
+use tokio::fs;
+use tokio::io::AsyncWriteExt;
 use rfd::AsyncFileDialog;
+
+use crate::{get_minecraft_dir, write_json};
 
 pub async fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf> {
     let mut mc_path: PathBuf = get_minecraft_dir::dir()?;
-    while !mc_path.is_dir().await {
+    while !mc_path.is_dir() {
         mc_path = std::path::PathBuf::from(
             AsyncFileDialog::new()
                 .set_title("Select .minecraft folder:")
@@ -33,16 +34,16 @@ pub async fn run(mc_version: &String, quilt_version: &String) -> Result<PathBuf>
     fs::File::create(&path_version).await?; // dummy jar required by the launcher.
 
     path_version.set_extension("json");
-    let json_file = File::create(&path_version).await?;
-    write_json::write_version(mc_version, quilt_version, &json_file).await?;
+    let mut json_file = fs::File::create(&path_version).await?;
+    write_json::write_version(mc_version, quilt_version, &mut json_file).await?;
 
     mc_path.push("launcher_profiles");
     mc_path.set_extension("json");
 
-    let mut launcher_file = File::open(&mc_path).await?;
-    let profile = write_json::write_profile(mc_version, quilt_version, &launcher_file).await?;
+    let mut launcher_file = fs::File::open(&mc_path).await?;
+    let profile = write_json::write_profile(mc_version, quilt_version, &mut launcher_file).await?;
 
-    launcher_file = File::create(&mc_path).await?;
+    launcher_file = fs::File::create(&mc_path).await?;
     launcher_file.write_all(profile.as_bytes()).await?;
 
     Ok(path_mods)

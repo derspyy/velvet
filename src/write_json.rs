@@ -1,7 +1,6 @@
 use anyhow::Result;
-use async_std::fs::File;
-use async_std::io::ReadExt;
-use async_std::prelude::*;
+use tokio::fs;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -33,14 +32,14 @@ struct Profile {
     extra: HashMap<String, Value>,
 }
 
-pub async fn write_version(mc: &String, velvet: &String, mut z: &File) -> Result<()> {
+pub async fn write_version(mc: &String, velvet: &String, z: &mut fs::File) -> Result<()> {
     let url = format!("https://meta.quiltmc.org/v3/versions/loader/{mc}/{velvet}/profile/json");
     let json: serde_json::Value = reqwest::get(&url).await?.json().await?;
     z.write_all(&serde_json::to_vec_pretty(&json)?).await?;
     Ok(())
 }
 
-pub async fn write_profile(mc: &String, velvet: &String, mut x: &File) -> Result<String> {
+pub async fn write_profile(mc: &String, velvet: &String, x: &mut fs::File) -> Result<String> {
     let mut bytes = Vec::new();
     x.read_to_end(&mut bytes).await?;
     let mut json: LauncherProfiles = serde_json::from_slice(&bytes)?;

@@ -1,8 +1,6 @@
 #![windows_subsystem = "windows"]
 
-use anyhow::Result;
-use iced::futures::TryFutureExt;
-use serde::Deserialize;
+
 
 mod get_minecraft_dir;
 mod get_mods;
@@ -12,6 +10,9 @@ pub mod write_json;
 
 use iced::widget::{Column, Space, button, checkbox, column, container, pick_list, text, tooltip};
 use iced::{Alignment, Element, Length, Size, Task, Theme, application, theme::Palette, window};
+use anyhow::Result;
+use iced::futures::TryFutureExt;
+use serde::Deserialize;
 
 #[derive(Deserialize)]
 struct Versions {
