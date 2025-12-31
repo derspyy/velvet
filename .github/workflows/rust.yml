@@ -2,11 +2,11 @@ name: Rust
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     tags:
-      - '*'
+      - "*"
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 env:
@@ -20,82 +20,38 @@ jobs:
         include:
           - os: ubuntu-latest
             path: "target/release/velvet-minecraft"
-            linux: true
             filename: velvet-linux
           - os: macos-latest
             path: "target/release/velvet-minecraft"
-            linux: false
             filename: velvet-macos
           - os: windows-latest
             path: "target/release/velvet-minecraft.exe"
-            linux: false
             filename: velvet-windows.exe
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    - uses: rui314/setup-mold@v1
-    - name: Install dependencies (Linux)
-      if: ${{ matrix.linux }}
-      run: sudo apt update && sudo apt install libgtk-3-dev libarchive-tools
-    - name: Build
-      run: cargo build --release --verbose
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: velvet-${{ matrix.os }}
-        path: ${{ matrix.path }}
-    - name: Upload binaries to release
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ${{ matrix.path }}
-        asset_name: ${{ matrix.filename }}
-        tag: ${{ github.ref }}
-    - name: Prepare AppImage Build
-      if: ${{ matrix.linux }}
-      run: |
-        mkdir -p AppDir/usr/bin
-        cp target/release/velvet-minecraft AppDir/usr/bin
-        mkdir -p AppDir/usr/share/icons
-        mv res/icon.png AppDir/usr/share/icons/velvet-minecraft.png
-        mkdir AppDir/usr/share/applications
-    - name: Build AppImage
-      if: ${{ matrix.linux }}
-      uses: AppImageCrafters/build-appimage@master
-      with:
-        recipe: AppImageBuilder.yml
-        args: '--skip-tests'
-      env:
-        UPDATE_INFO: gh-releases-zsync|derspyy|velvet|latest|*.AppImage.zsync
-    - name: Upload a Build Artifact (AppImage)
-      if: ${{ matrix.linux }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: velvet-${{ matrix.os }}
-        path: ${{ matrix.path }}
-    - name: Upload binaries to release (AppImage)
-      if:  ${{ startsWith(github.ref, 'refs/tags/') && matrix.linux }}
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: Velvet Installer-latest-x86_64.AppImage
-        asset_name: velvet-linux.AppImage
-        tag: ${{ github.ref }}
-    - name: Upload zsync to release (AppImage)
-      if:  ${{ startsWith(github.ref, 'refs/tags/') && matrix.linux }}
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: Velvet Installer-latest-x86_64.AppImage.zsync
-        asset_name: velvet-linux.AppImage.zsync
-        tag: ${{ github.ref }}
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: rui314/setup-mold@v1
+      - name: Build
+        run: cargo build --release --verbose
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: velvet-${{ matrix.os }}
+          path: ${{ matrix.path }}
+      - name: Upload binaries to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.path }}
+          asset_name: ${{ matrix.filename }}
+          tag: ${{ github.ref }}
