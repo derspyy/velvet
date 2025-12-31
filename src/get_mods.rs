@@ -2,7 +2,7 @@ use anyhow::Result;
 use iced::futures::future::try_join_all;
 use reqwest::{Client, ClientBuilder};
 use serde::Deserialize;
-use sha1::{Digest, Sha1};
+use sha1_smol::Sha1;
 use tokio::fs::{File, read, read_dir, remove_file};
 use tokio::io::AsyncWriteExt;
 
@@ -94,13 +94,12 @@ pub async fn run(
 
     while let Some(file) = mod_folder_reader.next_entry().await? {
         let file_name = file.file_name().to_string_lossy().to_string();
-        let mod_id = String::from(&file_name[0..8]);
         let file_bytes = read(file.path()).await?;
+        let file_hash = Sha1::from(file_bytes).hexdigest();
 
-        let result = Sha1::digest(file_bytes);
-        let hash_hex = hex::encode(result);
+        let mod_id = String::from(&file_name[0..8]);
 
-        existing_mods.insert(mod_id, hash_hex);
+        existing_mods.insert(mod_id, file_hash);
     }
 
     let mut mods = HashSet::new();
