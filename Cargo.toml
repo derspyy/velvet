@@ -16,7 +16,7 @@ iced = { version = "0.14", features = [
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 home = "0.5"
-rfd = "0.16"
+rfd = { version = "0.16", default-features = false, features = ["xdg-portal", "wayland", "tokio"] }
 sha1 = { version = "0.10.6", features = ["asm"] }
 hex = "0.4.3"
 tokio = { version = "1.48", features = ["fs", "io-util"] }
