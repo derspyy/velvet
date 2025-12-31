@@ -1,17 +1,15 @@
 #![windows_subsystem = "windows"]
 
-
-
 mod get_minecraft_dir;
 mod get_mods;
 mod install_velvet;
 mod theme;
 pub mod write_json;
 
-use iced::widget::{Column, Space, button, checkbox, column, container, pick_list, text, tooltip};
-use iced::{Alignment, Element, Length, Size, Task, Theme, application, theme::Palette, window};
 use anyhow::Result;
 use iced::futures::TryFutureExt;
+use iced::widget::{Column, button, checkbox, column, container, pick_list, space, text, tooltip};
+use iced::{Alignment, Element, Length, Size, Task, Theme, application, theme::Palette, window};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -20,21 +18,18 @@ struct Versions {
     stable: bool,
 }
 
-pub fn main() -> iced::Result {
-    application(Velvet::title, Velvet::update, Velvet::view)
+fn main() -> iced::Result {
+    application(Velvet::new, Velvet::update, Velvet::view)
+        .title(Velvet::title)
         .theme(Velvet::theme)
         .window(window::Settings {
             size: Size::new(500.0, 250.0),
             resizable: false,
-            icon: window::icon::from_file_data(
-                include_bytes!("../res/icon.png"),
-                Some(image::ImageFormat::Png),
-            )
-            .ok(),
+            icon: window::icon::from_file_data(include_bytes!("../res/icon.png"), None).ok(),
             ..window::Settings::default()
         })
         .antialiasing(true)
-        .run_with(Velvet::new)
+        .run()
 }
 
 struct Velvet {
@@ -118,7 +113,7 @@ impl Velvet {
                             Message::Done,
                         ));
                         commands.push(
-                            window::get_oldest()
+                            window::oldest()
                                 .and_then(move |id| window::resize(id, (500.0, 250.0).into())),
                         );
                         return Task::batch(commands);
@@ -131,13 +126,13 @@ impl Velvet {
                     let missing_mods = !x.is_empty();
                     self.status = Status::Success(x);
                     if missing_mods {
-                        return window::get_latest()
+                        return window::oldest()
                             .and_then(move |id| window::resize(id, (500.0, 275.0).into()));
                     };
                 }
                 Err(e) => {
                     self.status = Status::Failure(e);
-                    return window::get_latest()
+                    return window::oldest()
                         .and_then(move |id| window::resize(id, (500.0, 275.0).into()));
                 }
             },
@@ -186,23 +181,27 @@ impl Velvet {
             .width(Length::Fixed(200.0))
             .style(theme::pick_list_style)
             .menu_style(theme::menu_style),
-            Space::with_height(Length::Fill),
-            checkbox("Show snapshots", self.snapshot)
+            space().height(Length::Fill),
+            checkbox(self.snapshot)
+                .label("Show snapshots")
                 .on_toggle(Message::Snapshot)
                 .style(theme::checkbox_style),
             column![
-                checkbox("Vanilla - Performance enhancing modlist.", self.vanilla,)
+                checkbox(self.vanilla)
+                    .label("Vanilla - Performance enhancing modlist.")
                     .on_toggle(Message::VButton)
                     .style(theme::checkbox_style),
-                checkbox("Beauty - Immersive and beautiful modlist.", self.beauty,)
+                checkbox(self.beauty)
+                    .label("Beauty - Immersive and beautiful modlist.")
                     .on_toggle(Message::BButton)
                     .style(theme::checkbox_style),
-                checkbox("Optifine - Optifine resource pack parity.", self.optifine,)
+                checkbox(self.optifine)
+                    .label("Optifine - Optifine resource pack parity.")
                     .on_toggle(Message::OButton)
                     .style(theme::checkbox_style),
             ]
             .align_x(Alignment::Start),
-            Space::with_height(Length::Fill),
+            space().height(Length::Fill),
             button(button_message)
                 .on_press(Message::Pressed)
                 .style(theme::button_style),
@@ -228,6 +227,7 @@ impl Velvet {
                 primary: theme::LOVE,
                 success: theme::FOAM,
                 danger: theme::LOVE,
+                warning: theme::GOLD,
             },
         )
     }

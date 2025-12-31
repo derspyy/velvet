@@ -14,6 +14,7 @@ pub const TEXT: Color = color!(0xe0def4);
 pub const SUBTLE: Color = color!(0x908caa);
 pub const LOVE: Color = color!(0xeb6f92);
 pub const FOAM: Color = color!(0x9ccfd8);
+pub const GOLD: Color = color!(0xf6c177);
 
 pub fn container_style(_: &Theme) -> container::Style {
     container::Style {
@@ -29,6 +30,7 @@ pub fn container_style(_: &Theme) -> container::Style {
             offset: Vector::new(0.0, 0.0),
             blur_radius: 0.0,
         },
+        ..Default::default()
     }
 }
 
@@ -57,6 +59,11 @@ pub fn menu_style(_: &Theme) -> menu::Style {
             color: BASE,
             width: 1.0,
             radius: Radius::new(5.0),
+        },
+        shadow: Shadow {
+            color: BASE,
+            offset: Vector::new(0.0, 0.0),
+            blur_radius: 0.0,
         },
         selected_text_color: LOVE,
         selected_background: Background::Color(BASE),
@@ -101,5 +108,6 @@ pub fn button_style(_: &Theme, status: button::Status) -> button::Style {
             },
             offset: Vector::new(0.0, 0.0),
         },
+        ..Default::default()
     }
 }
