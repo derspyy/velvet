@@ -170,7 +170,7 @@ impl Velvet {
             Status::Failure(e) => ("Error!", Some(text(e).color(theme::LOVE).into())),
         };
 
-        column![
+        let mut main_column = column![
             text("Enter Minecraft version:").size(20),
             pick_list(
                 self.version_list.clone(),
@@ -181,7 +181,7 @@ impl Velvet {
             .width(Length::Fixed(200.0))
             .style(theme::pick_list_style)
             .menu_style(theme::menu_style),
-            space().height(Length::Fill),
+            space().height(Length::Fixed(10.0)),
             checkbox(self.snapshot)
                 .label("Show snapshots")
                 .on_toggle(Message::Snapshot)
@@ -201,21 +201,23 @@ impl Velvet {
                     .style(theme::checkbox_style),
             ]
             .align_x(Alignment::Start),
-            space().height(Length::Fill),
+            space().height(Length::Fixed(10.0)),
             button(button_message)
                 .on_press(Message::Pressed)
                 .style(theme::button_style),
-            if let Some(message) = extra_message {
-                message
-            } else {
-                column![].into()
-            },
         ]
         .spacing(5.0)
         .padding(10.0)
         .align_x(Alignment::Center)
         .width(Length::Fill)
-        .height(Length::Fill)
+        .height(Length::Fill);
+
+        if let Some(message) = extra_message {
+            main_column = main_column.push(space().height(Length::Fill));
+            main_column = main_column.push(message);
+        }
+
+        main_column
     }
 
     fn theme(&self) -> Theme {
