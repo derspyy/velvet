@@ -48,7 +48,7 @@ const OPTIFINE: [&str; 9] = [
     "P7dR8mSH", // fabric-api
 ];
 
-const MODRINTH_SERVER: &str = "https://api.modrinth.com/v2/project";
+const MODRINTH_SERVER: &str = "https://api.modrinth.com/v2";
 
 enum Status {
     Found(&'static str, String, String),
@@ -173,11 +173,11 @@ async fn download_mod(url: String, file_name: &str, path: PathBuf, client: Clien
 }
 
 async fn check_latest(x: &'static str, client: Client, mc_version: String) -> Result<Status> {
-    let mut modrinth_url = format!("{MODRINTH_SERVER}/{x}");
+    let mut modrinth_url = format!("{MODRINTH_SERVER}/project/{x}");
     let project: Project = client.get(&modrinth_url).send().await?.json().await?;
 
     modrinth_url = format!(
-        "{modrinth_url}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{mc_version:?}]"
+        "{modrinth_url}/version?loaders=[\"fabric\", \"quilt\"]&game_versions=[{mc_version:?}]&include_changelog=false"
     );
 
     let version_response: Vec<Version> = client.get(&modrinth_url).send().await?.json().await?;
